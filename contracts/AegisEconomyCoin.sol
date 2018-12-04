@@ -17,7 +17,7 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     string  public  constant    name = "Aegis Economy Coin";
     string  public  constant    symbol = "AGEC";
     uint256 public  constant    decimals = 18;
-    uint256 private constant    initialSupply =  50*(10**6)* (10**18);    // 50 million Tokens
+    uint256 private constant    initialSupply = 50*(10**6)* (10**18);    // 50 million Tokens
     uint256 private             supplyPerDay;
 
     uint256 private             inflationYearOneStart;
@@ -30,15 +30,15 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     uint256 private constant    totalDaysInNonLeapYear = 365 days;
     
     uint256 private             releasedTokens;
-    uint    private              percentageForBusiness;
-    uint    private              percentageForDevelopment;  
+    uint    private             percentageForBusiness;
+    uint    private             percentageForDevelopment;  
     
-    BusinessAcc    private       businessContract;           
-    DevelopmentAcc private       developmentContract;     
+    BusinessAcc    private      businessContract;           
+    DevelopmentAcc private      developmentContract;     
 
-    // TODO: Change owner address
-    // TBD: add pausable feature???
-    // TODO: Coin Minted HISTORY in coming phase
+    // TODO: Change owner address for all three accounts
+
+    // Reserch: Coin Minted HISTORY // Events
     
     /// @author Gagandeep_HashCode
     /// @notice Contructor for initial setup
@@ -69,24 +69,24 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     public 
     { 
             uint256 amount = 0;
-            uint256 currentTime = now.add(_timeLap);                              // IMPORTANT!! remove .add(_timeLap)
+            uint256 currentTime = now.add(_timeLap);             // remove 
             if (currentTime >= inflationYearOneStart) {                                            
                 if (currentTime > inflationYearTwoStart) {                                            
                     if (currentTime > inflationYearThreeStart) {                                     
-                        amount = (supplyPerDay.mul(inflationRateAfterThreeYears)).div(10000);   // 2 - 3 year and onwards
+                        amount = (totalSupply_.mul(inflationRateAfterThreeYears)).div(10000);   // 2 - 3 year and onwards
                     } else {                                                                    
-                        amount = (supplyPerDay.mul(inflationRateAfterTwoYears)).div(10000);     // 1 - 2 year
+                        amount = (totalSupply_.mul(inflationRateAfterTwoYears)).div(10000);     // 1 - 2 year
                     }
                 } else {
-                    amount = (supplyPerDay.mul(inflationRateAfterOneYear)).div(10000);           // 0 - 1 year
+                    amount = (totalSupply_.mul(inflationRateAfterOneYear)).div(10000);           // 0 - 1 year
                 }
             } else {
                 revert();                                                                       // < 0 year
             }
             require (amount != 0);
             mint(owner, amount);
-            supplyPerDay = totalSupply_.div(365);
-            creditContracts();
+            supplyPerDay = amount.div(365);             // 1000 tokens
+            creditContracts();                          // dev: 500 tokens; busi: 500 tokens                            
     }
 
 
@@ -96,8 +96,7 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     function setBusinessAcc(BusinessAcc _address) 
     onlyOwner
     public 
-    {
-            
+    {            
             require (businessContract == address(0)); 
             require(_address != address(0));
 
