@@ -43,14 +43,6 @@ contract DevelopmentAcc is Ownable {
   		_;
   	}
 
-  	// /// Modifier to check if status is in submission state
-  	// modifier ifBacklogInSubmissionState(uint256 _backlogId) {
-  	// 	bool value = checkStatus(_backlogId);
-  	// 	require(value == true);
-  	// 	_;
-  	// }
- 	
-
 	/* ******
 	 * EVENTS
 	 */
@@ -62,6 +54,7 @@ contract DevelopmentAcc is Ownable {
   	event SuccessfulTokensTransferToVoters(uint256 _backlogId);
 
 	
+	// Pending: check for : address should be of type contract address
 	/// @author Gagandeep_HashCode
     /// @notice Contructor for initial setup
 	constructor (AegisEconomyCoin _address, 
@@ -71,8 +64,6 @@ contract DevelopmentAcc is Ownable {
 		uint256 _secondWinnerPer, 
 		uint256 _thirdWinnerPer) 
 	{
-		// Pending: check for : address should be of type contract address
-
 			require(_address != address(0));
 			require(_devPercentage != 0);
 			require(_voterPercentage != 0);
@@ -100,6 +91,7 @@ contract DevelopmentAcc is Ownable {
 			aegisCoin.transfer(_receiver, _value);
 	}
 
+
 	function creditRemainingTokens(uint256 _tokens)
 	onlyAdmin
 	public
@@ -122,7 +114,7 @@ contract DevelopmentAcc is Ownable {
 	struct backlogDetails {
         uint256 totalTokens;
         uint256 totalVoters;
-		uint256 statusValue;	// will have only 7 values set here	
+		uint256 statusValue;
 		uint256 tokensPerVoter;
 	}
 	
@@ -192,7 +184,6 @@ contract DevelopmentAcc is Ownable {
 		require(_tokens != 0);
 		require(backlogId2backlogDetails[_backlogId].statusValue >= 0);
 		require(backlogId2backlogDetails[_backlogId].statusValue < 2);	// allow status == 0 (not started); status == 1 (submission period)
-		require(backlogId2backlogDetails[_backlogId].totalVoters == 0);	// TBD: probably not required as when in submission state; total voters will be 0
 
 		uint256 newTokens      = 0;
 		uint256 newTotalTokens = 0; 
@@ -281,7 +272,7 @@ contract DevelopmentAcc is Ownable {
 			// update reserved tokens
 			totalTokensReserved = totalTokensReserved.sub(tokens.mul(voters.length));
 			//update status to successfully paid and now closed
-			backlogId2backlogDetails[_backlogId].statusValue = 5;
+			backlogId2backlogDetails[_backlogId].statusValue = 5;  // TODO: do a check if total voters are reached or not before setting this value to 5
 			SuccessfulTokensTransferToVoters(_backlogId); 
 	}
 
@@ -459,7 +450,7 @@ contract DevelopmentAcc is Ownable {
   				value = true;
   			}
   		}
-  		return value;
+  		return value;	// TODO: return true if totalTokens != 0 for given backlog id, else return false
   	}
 
 
@@ -579,7 +570,5 @@ contract DevelopmentAcc is Ownable {
     // TODO: Reggresive testing for gas exhaustion
 }
 
-// TBD
-// function to check if winners are paid or not
-// function to check if voters are paid or not
-// function to check which backlogs have pending transactions to voters
+// TODO: function to check if winners are paid or not
+// TODO: function to check if voters are paid or not
