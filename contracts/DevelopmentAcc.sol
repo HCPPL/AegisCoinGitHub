@@ -17,30 +17,28 @@ contract DevelopmentAcc is Ownable {
  	uint256          private totalTokensReserved;
  	uint256          private remainingTokensForBacklog;
 
-    // TODO: Change owner address
-
  	/* *********
  	 * MODIFIERS
  	 */
 
  	/// Modifier to allow only aegisCoin contract to call a method
  	modifier onlyAdmin() {
- 		require (msg.sender == address(aegisCoin));
- 		_;
+	 		require (msg.sender == address(aegisCoin));
+	 		_;
   	} 
 
  	/// Modifier to check if backlogId is valid
   	modifier ifBacklogExisted(uint256 _backlogId) {
-  		bool value = checkForBacklogExistence(_backlogId);
-  		require(value == true);
-  		_;
+	  		bool value = checkForBacklogExistence(_backlogId);
+	  		require(value == true);
+	  		_;
   	}
 
   	/// Modifier to check if backlogId is valid
   	modifier ifBacklogNotExisted(uint256 _backlogId) {
-  		bool value = checkForBacklogExistence(_backlogId);
-  		require(value == false);
-  		_;
+	  		bool value = checkForBacklogExistence(_backlogId);
+	  		require(value == false);
+  			_;
   	}
 
 	/* ******
@@ -112,10 +110,11 @@ contract DevelopmentAcc is Ownable {
      */
 
 	struct backlogDetails {
-        uint256 totalTokens;
-        uint256 totalVoters;
-		uint256 statusValue;
-		uint256 tokensPerVoter;
+	        uint256 totalTokens;
+	        uint256 totalVoters;
+			uint256 statusValue;
+			uint256 tokensPerVoter;
+			uint256 totalVotersPaid;
 	}
 	
 	mapping (uint256 => backlogDetails) private backlogId2backlogDetails;
@@ -130,22 +129,23 @@ contract DevelopmentAcc is Ownable {
 	ifBacklogNotExisted(_backlogId)
 	public
 	{
-		require(_backlogId != 0);
-		require(_tokens != 0);
-		require(_tokens <= remainingTokensForBacklog); 
+			require(_backlogId != 0);
+			require(_tokens != 0);
+			require(_tokens <= remainingTokensForBacklog); 
 
-		// pushing new backlog id to backlog-ids array
-		backlogDetails backlogId = backlogId2backlogDetails[_backlogId];
-		// adding new record to backlog struct
-		backlogId.totalTokens = _tokens;
-		backlogId.totalVoters = 0;
-		backlogId.statusValue = 0;
-		backlogId.tokensPerVoter = 0;
-		backlogIds.push(_backlogId)-1;
-		// set reserved value and other variables here
-		totalTokensReserved = totalTokensReserved.add(_tokens);
-		remainingTokensForBacklog = remainingTokensForBacklog.sub(_tokens);
-		SuccessfulAdditionOfNewBacklog(_backlogId, _tokens);
+			// pushing new backlog id to backlog-ids array
+			backlogDetails backlogId = backlogId2backlogDetails[_backlogId];
+			// adding new record to backlog struct
+			backlogId.totalTokens = _tokens;
+			backlogId.totalVoters = 0;
+			backlogId.statusValue = 0;
+			backlogId.tokensPerVoter = 0;
+			backlogId.totalVotersPaid = 0;
+			backlogIds.push(_backlogId)-1;
+			// set reserved value and other variables here
+			totalTokensReserved = totalTokensReserved.add(_tokens);
+			remainingTokensForBacklog = remainingTokensForBacklog.sub(_tokens);
+			SuccessfulAdditionOfNewBacklog(_backlogId, _tokens);
 	}
 
 
@@ -157,18 +157,19 @@ contract DevelopmentAcc is Ownable {
 	ifBacklogExisted(_backlogId)
 	public
 	{
-		require(_backlogId != 0);
-		require(backlogId2backlogDetails[_backlogId].statusValue != 5);		// 5: closed
+			require(_backlogId != 0);
+			require(backlogId2backlogDetails[_backlogId].statusValue != 5);		// 5: closed
+			require(backlogId2backlogDetails[_backlogId].statusValue != 6);		// 6: deleted
 
-		uint256 tokenAmt = backlogId2backlogDetails[_backlogId].totalTokens;
-		// release reserved tokens
-		totalTokensReserved = totalTokensReserved.sub(tokenAmt);
-		remainingTokensForBacklog = remainingTokensForBacklog.add(tokenAmt);
-		// update backlog details
-		backlogId2backlogDetails[_backlogId].totalTokens = 0;
-		backlogId2backlogDetails[_backlogId].totalVoters = 0;
-		backlogId2backlogDetails[_backlogId].statusValue = 6;	//6: deleted
-		SuccessfulDeletionOfBacklog(_backlogId);
+			uint256 tokenAmt = backlogId2backlogDetails[_backlogId].totalTokens;
+			// release reserved tokens
+			totalTokensReserved = totalTokensReserved.sub(tokenAmt);
+			remainingTokensForBacklog = remainingTokensForBacklog.add(tokenAmt);
+			// update backlog details
+			backlogId2backlogDetails[_backlogId].totalTokens = 0;
+			backlogId2backlogDetails[_backlogId].totalVoters = 0;
+			backlogId2backlogDetails[_backlogId].statusValue = 6;	//6: deleted
+			SuccessfulDeletionOfBacklog(_backlogId);
 	}
 
 
@@ -180,30 +181,30 @@ contract DevelopmentAcc is Ownable {
 	ifBacklogExisted(_backlogId)		
 	public
 	{
-		require(_backlogId != 0);
-		require(_tokens != 0);
-		require(backlogId2backlogDetails[_backlogId].statusValue >= 0);
-		require(backlogId2backlogDetails[_backlogId].statusValue < 2);	// allow status == 0 (not started); status == 1 (submission period)
+			require(_backlogId != 0);
+			require(_tokens != 0);
+			require(backlogId2backlogDetails[_backlogId].statusValue >= 0);
+			require(backlogId2backlogDetails[_backlogId].statusValue < 2);
 
-		uint256 newTokens      = 0;
-		uint256 newTotalTokens = 0; 
-		backlogDetails backlogId = backlogId2backlogDetails[_backlogId];
-		uint256 tokens = backlogId.totalTokens;
-		// to subtract the previous token value from total
-		totalTokensReserved = totalTokensReserved.sub(tokens);
-		remainingTokensForBacklog = remainingTokensForBacklog.add(tokens);		
-		if(tokens < _tokens) {
-				newTokens = _tokens.sub(tokens);
-		} else {
-			    newTokens = tokens.sub(_tokens);
-		}
-		newTotalTokens = tokens.add(newTokens);
-		// update backlog details
-		backlogId.totalTokens = newTotalTokens;
-		// to add the new calculated tokens to be reserved to total
-		totalTokensReserved = totalTokensReserved.add(newTotalTokens);
-		remainingTokensForBacklog = remainingTokensForBacklog.sub(newTotalTokens);
-		SuccessfulUpdateOfBacklog(_backlogId, _tokens);
+			uint256 newTokens      = 0;
+			uint256 newTotalTokens = 0; 
+			backlogDetails backlogId = backlogId2backlogDetails[_backlogId];
+			uint256 tokens = backlogId.totalTokens;
+			// to subtract the previous token value from total
+			totalTokensReserved = totalTokensReserved.sub(tokens);
+			remainingTokensForBacklog = remainingTokensForBacklog.add(tokens);		
+			if(tokens < _tokens) {
+					newTokens = _tokens.sub(tokens);
+			} else {
+				    newTokens = tokens.sub(_tokens);
+			}
+			newTotalTokens = tokens.add(newTokens);
+			// update backlog details
+			backlogId.totalTokens = newTotalTokens;
+			// to add the new calculated tokens to be reserved to total
+			totalTokensReserved = totalTokensReserved.add(newTotalTokens);
+			remainingTokensForBacklog = remainingTokensForBacklog.sub(newTotalTokens);
+			SuccessfulUpdateOfBacklog(_backlogId, _tokens);
 	}
 
 
@@ -237,6 +238,7 @@ contract DevelopmentAcc is Ownable {
 			uint256 tokensForFirstWinner;
 			uint256 tokensForSecondWinner;
 			uint256 tokensForThirdWinner;
+			backlogId2backlogDetails[_backlogId].totalVoters = _totalVoters;
 			(tokensForDevelopers, tokensForVoters) = calculateFunds(backlogId2backlogDetails[_backlogId].totalTokens);
 			(tokensForFirstWinner, tokensForSecondWinner, tokensForThirdWinner) = calculateWinnerFunds(tokensForDevelopers);
 			backlogId2backlogDetails[_backlogId].tokensPerVoter = calculateVoterFunds(tokensForVoters, _totalVoters);
@@ -249,6 +251,9 @@ contract DevelopmentAcc is Ownable {
             SuccessfulTokensTransferToWinners(_backlogId); 
 	} 
 
+	uint256 votersLength = 0;
+
+    function getVotersLength(uint256 _backlogId) view public returns (uint256, uint256) { return (votersLength, backlogId2backlogDetails[_backlogId].totalVoters); }
 
 	/// @notice Function to transfer tokens to Voters for given backlog-id
 	/// @dev As backlog-Id is mapped with tokensPerVoter. We need not to recalculate or pass it from php. This will be handled withing the smart contract
@@ -259,9 +264,12 @@ contract DevelopmentAcc is Ownable {
 	public
 	{
 			require(_backlogId != 0);
-			require (_voters.length != 0);
+			require(_voters.length != 0);
 			require(_voters.length <= 20);
 			require(backlogId2backlogDetails[_backlogId].statusValue == 4); 
+			require(backlogId2backlogDetails[_backlogId].totalVotersPaid.add(_voters.length) <= backlogId2backlogDetails[_backlogId].totalVoters); 
+
+			votersLength = _voters.length;
 
 			address[] memory voters = _voters;
 			uint256 tokens = backlogId2backlogDetails[_backlogId].tokensPerVoter;
@@ -271,8 +279,10 @@ contract DevelopmentAcc is Ownable {
 			}
 			// update reserved tokens
 			totalTokensReserved = totalTokensReserved.sub(tokens.mul(voters.length));
-			//update status to successfully paid and now closed
-			backlogId2backlogDetails[_backlogId].statusValue = 5;  // TODO: do a check if total voters are reached or not before setting this value to 5
+			backlogId2backlogDetails[_backlogId].totalVotersPaid = backlogId2backlogDetails[_backlogId].totalVotersPaid.add(voters.length);
+			if (backlogId2backlogDetails[_backlogId].totalVotersPaid == backlogId2backlogDetails[_backlogId].totalVoters) {
+					backlogId2backlogDetails[_backlogId].statusValue = 5;
+			}
 			SuccessfulTokensTransferToVoters(_backlogId); 
 	}
 
@@ -311,64 +321,32 @@ contract DevelopmentAcc is Ownable {
 
 	/// @notice Function to update the status value for given backlog-id
 	/// @param _backlogId Backlog ID
-	/// @param _statusValue Status Value in uint256
 	/// @return Return with bool value as true if update is a success else otherwise
-	function setBacklogStatus(uint256 _backlogId, uint256 _statusValue) 
+	function updateBacklogStatus(uint256 _backlogId) 
 	onlyOwner
 	ifBacklogExisted(_backlogId)
 	public
-	// returns (bool)
 	{
 			require(_backlogId != 0);
-			require(_statusValue != 5);
-			require(_statusValue >= 0);
-			require(_statusValue <= 6);
+			require(backlogId2backlogDetails[_backlogId].statusValue >= 0); 
+			require(backlogId2backlogDetails[_backlogId].statusValue <= 3); 
 
-
-			// *** TBD ***
-
-			// not started (0) 
-			// 		cannot be set to submission ended(2), voting start(3), end(4), close(5)
-			//		can be set to deleted(6), submission started (1)
-
-			// started (1)
-			// 		cannot be set to not started (0), voting started(3), voting ended (4), close(5)
-			//		can be set to deleted (6), submission ended (2)
-
-
-			// submission ended (2)
-			// 		cannot be set to not started (0), voting ended (4), close(5)
-			//		can be set to deleted (6), voting started(3)
-
-
-			// voting started (3)
-			// 		cannot be set to not started (0), started (1), ended (2), close(5)
-			//		can be set to deleted (6), voting ended (4)
-
-
-			// voting ended (4)
-			// 		cannot be set to not started (0), started (1), ended (2), voting started(3), close(5)
-			//		can be set to deleted (6) - tbd
-
-
-			// closed (5)
-			// 		cannot be set to any
-
-
-			// deleted (6)
-			// 		cannot be set to any
-
-			require(backlogId2backlogDetails[_backlogId].statusValue != 5); // can't set status to any if successfully paid
-			require(backlogId2backlogDetails[_backlogId].statusValue >= 0); // 0 <= status value <= 6
-			require(backlogId2backlogDetails[_backlogId].statusValue <= 6); // 0 <= status value <= 6
-			backlogId2backlogDetails[_backlogId].statusValue = _statusValue;
-			// return true;
+			backlogId2backlogDetails[_backlogId].statusValue = backlogId2backlogDetails[_backlogId].statusValue.add(1);
 	}
 
 
- /* **************************************************************************************************************************
-  *	Private Methods
-  */
+    function changeOwnerAddress(address _newOwner)
+    onlyOwner
+    public
+    {
+	        require(_newOwner != address(0));
+	        transferOwnership(_newOwner);
+    }
+
+
+ 	/* **************************************************************************************************************************
+  	*	Private Methods
+  	*/
 
   	/// @notice Function to update distributive percentage figures for developers and voters
 	/// @param _devPercentage Percentage value for developers
@@ -437,26 +415,25 @@ contract DevelopmentAcc is Ownable {
 	}
 
 
-	/// @notice Function to check if given backlog id is a valid one
+ 	/// @notice Function to check if given backlog id is a valid one
 	/// @param _backlogId Backlog ID
 	/// @return Bool value stating the validation of given backlog id
 	function checkForBacklogExistence(uint256 _backlogId)
   	private
+  	view
   	returns (bool)
   	{
-  		bool value = false;
-  		for(uint i=0; i<backlogIds.length; i++) {
-  			if(backlogIds[i] == _backlogId) {
-  				value = true;
-  			}
-  		}
-  		return value;	// TODO: return true if totalTokens != 0 for given backlog id, else return false
+	  		bool value = false;
+	  		if (backlogId2backlogDetails[_backlogId].totalTokens != 0) {
+	  			value = true;
+	  		}
+	  		return value;
   	}
 
 
- /* **************************************************************************************************************************
-  *	Getter Methods
-  */
+	/* **************************************************************************************************************************
+	 *	Getter Methods
+	 */
 
 	/// @notice Function to get array of backlog-Ids
 	/// @return Array of Backlog-Ids
@@ -474,12 +451,14 @@ contract DevelopmentAcc is Ownable {
 	/// @return total tokens reserved for this backlog
 	/// @return total voters count who voted for this backlog
 	/// @return current status of the backlog
+	/// @return tokens per Voter
+	/// @return total Voters Paid
 	function getBacklogIDDetails(uint256 _backlogId) 
 	view
 	public 
-	returns (uint256, uint256, uint256, uint256) 
+	returns (uint256, uint256, uint256, uint256, uint256) 
 	{
-    	    return (backlogId2backlogDetails[_backlogId].totalTokens, backlogId2backlogDetails[_backlogId].totalVoters, backlogId2backlogDetails[_backlogId].statusValue, backlogId2backlogDetails[_backlogId].tokensPerVoter);
+    	    return (backlogId2backlogDetails[_backlogId].totalTokens, backlogId2backlogDetails[_backlogId].totalVoters, backlogId2backlogDetails[_backlogId].statusValue, backlogId2backlogDetails[_backlogId].tokensPerVoter, backlogId2backlogDetails[_backlogId].totalVotersPaid);
     }
 
 
@@ -558,17 +537,21 @@ contract DevelopmentAcc is Ownable {
   	returns (bool)
   	{
   		bool value = false;
-  		for(uint i=0; i<backlogIds.length; i++) {
-  			if(backlogIds[i] == _backlogId) {
-  				value = true;
-  			}
+  		if (backlogId2backlogDetails[_backlogId].totalTokens != 0) {
+  			value = true;
   		}
   		return value;
   	}
 
+  	function getOwner()
+    public
+    view
+    returns (address)
+    {
+            return owner;
+    }
+
+
     // Our service to check if gas is exhausted or not. There should be enough ethers to execute all the method calls that are inline.
     // TODO: Reggresive testing for gas exhaustion
 }
-
-// TODO: function to check if winners are paid or not
-// TODO: function to check if voters are paid or not
