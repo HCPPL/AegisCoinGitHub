@@ -53,4 +53,42 @@ contract('Business Contract', async (accounts) => {
               await tryCatch(businessContract.transferTokens(accounts[2], 3000, {from: deployerAddress}), errTypes.revert);
         });
 
+        // ==============================================================================================================
+        // 3. Change Owner Address
+
+        // positive scenario
+          it('Case 3.1 : Change Owner Address: positive scenario ', async () => {
+              aegisCoinContract = await AegisCoin.new(50, 50, {from: deployerAddress}); 
+              businessContract = await BusinessAcc.new(aegisCoinContract.address, {from: deployerAddress}); 
+              developmentContract = await DevelopmentAcc.new(aegisCoinContract.address, 50, 50, 50, 35, 15, {from: deployerAddress}); 
+              await aegisCoinContract.setBusinessAcc(businessContract.address, {from: deployerAddress});
+              await aegisCoinContract.setDevelopmentAcc(developmentContract.address, {from: deployerAddress});
+              
+              await businessContract.changeOwnerAddress(accounts[2]);
+              let test_owner = await businessContract.getOwner();
+              assert.equal(test_owner, accounts[2], "Onwer address did not matched");
+          });
+
+          // revert when not called by owner
+          it('Case 3.2 : Change Owner Address: revert when not called by owner', async () => {
+              aegisCoinContract = await AegisCoin.new(50, 50, {from: deployerAddress}); 
+              businessContract = await BusinessAcc.new(aegisCoinContract.address, {from: deployerAddress}); 
+              developmentContract = await DevelopmentAcc.new(aegisCoinContract.address, 50, 50, 50, 35, 15, {from: deployerAddress}); 
+              await aegisCoinContract.setBusinessAcc(businessContract.address, {from: deployerAddress});
+              await aegisCoinContract.setDevelopmentAcc(developmentContract.address, {from: deployerAddress});
+              
+              await tryCatch(businessContract.changeOwnerAddress(accounts[2], {from: accounts[2]}), errTypes.revert);
+          });
+
+          // revert when new owner is null address
+          it('Case 3.3 : Change Owner Address: revert when new owner is null address', async () => {
+              aegisCoinContract = await AegisCoin.new(50, 50, {from: deployerAddress}); 
+              businessContract = await BusinessAcc.new(aegisCoinContract.address, {from: deployerAddress}); 
+              developmentContract = await DevelopmentAcc.new(aegisCoinContract.address, 50, 50, 50, 35, 15, {from: deployerAddress}); 
+              await aegisCoinContract.setBusinessAcc(businessContract.address, {from: deployerAddress});
+              await aegisCoinContract.setDevelopmentAcc(developmentContract.address, {from: deployerAddress});
+              
+              await tryCatch(businessContract.changeOwnerAddress(null_address), errTypes.revert);
+          });
+
 });
