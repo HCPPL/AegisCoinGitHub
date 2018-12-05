@@ -9,8 +9,8 @@ contract BusinessAcc is Ownable {
 
  	/// Modifier to allow only aegisCoin contract to call a method
  	modifier onlyAdmin() {
- 		require (msg.sender == address(aegisCoin));
- 		_;
+     		require (msg.sender == address(aegisCoin));
+     		_;
   	} 
 
  	/// @author Gagandeep_HashCode
@@ -32,8 +32,24 @@ contract BusinessAcc is Ownable {
 			aegisCoin.transfer(_receiver, _value);
 	}
 
+	function changeOwnerAddress(address _newOwner)
+    onlyOwner
+    public
+    {
+        	require(_newOwner != address(0));
+            transferOwnership(_newOwner);
+    }
 
 	// ========================= Getter Methods ===============================
+
+	function getOwner()
+    public
+    view
+    returns (address)
+    {
+            return owner;
+    }
+
 
     function getAegisCoinAddress() 
     public 
@@ -42,7 +58,4 @@ contract BusinessAcc is Ownable {
     {
 	        return aegisCoin;
     }
-
-
-    // TODO: change owner address!
 }

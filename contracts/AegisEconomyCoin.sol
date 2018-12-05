@@ -36,8 +36,6 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     BusinessAcc    private      businessContract;           
     DevelopmentAcc private      developmentContract;     
 
-    // TODO: Change owner address for all three accounts
-
     // Reserch: Coin Minted HISTORY // Events
     
     /// @author Gagandeep_HashCode
@@ -161,12 +159,19 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     {
         require(_percentageForDevelopment != 0);
         require(_percentageForBusiness != 0);
-        require(_percentageForDevelopment.add(_percentageForBusiness) == 100);    // developer% + business% = 100%
+        require(_percentageForDevelopment.add(_percentageForBusiness) == 100);
      
         percentageForDevelopment = _percentageForDevelopment;
         percentageForBusiness = _percentageForBusiness;
     }
 
+    function changeOwnerAddress(address _newOwner)
+    onlyOwner
+    public
+    {
+            require(_newOwner != address(0));
+            transferOwnership(_newOwner);
+    }
 
     // ==============================================================================================
     // Private Methods
