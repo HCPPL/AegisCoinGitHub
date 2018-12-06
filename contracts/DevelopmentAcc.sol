@@ -15,7 +15,6 @@ contract DevelopmentAcc is Ownable {
  	uint256          private secondWinnerPercentage; 
  	uint256          private thirdWinnerPercentage; 
  	uint256          private totalTokensReserved;
- 	uint256          private remainingTokensForBacklog;
 
  	/* *********
  	 * MODIFIERS
@@ -73,7 +72,6 @@ contract DevelopmentAcc is Ownable {
 
 			aegisCoin = _address;
 			totalTokensReserved = 0;
-			remainingTokensForBacklog = 0;
 			setDeveloperVoterPercentage(_devPercentage, _voterPercentage);
 			setWinnersPercentage(_firstWinnerPer, _secondWinnerPer, _thirdWinnerPer);
 	}	
@@ -86,15 +84,8 @@ contract DevelopmentAcc is Ownable {
 	onlyAdmin 
 	public 
 	{
+			require(_value <= remainingTokens());
 			aegisCoin.transfer(_receiver, _value);
-	}
-
-
-	function creditRemainingTokens(uint256 _tokens)
-	onlyAdmin
-	public
-	{
-			remainingTokensForBacklog = remainingTokensForBacklog.add(_tokens);
 	}
 
     /* ***************************************************************************************
@@ -131,7 +122,7 @@ contract DevelopmentAcc is Ownable {
 	{
 			require(_backlogId != 0);
 			require(_tokens != 0);
-			require(_tokens <= remainingTokensForBacklog); 
+			require(_tokens <= remainingTokens()); 
 
 			// pushing new backlog id to backlog-ids array
 			backlogDetails backlogId = backlogId2backlogDetails[_backlogId];
@@ -144,7 +135,6 @@ contract DevelopmentAcc is Ownable {
 			backlogIds.push(_backlogId)-1;
 			// set reserved value and other variables here
 			totalTokensReserved = totalTokensReserved.add(_tokens);
-			remainingTokensForBacklog = remainingTokensForBacklog.sub(_tokens);
 			SuccessfulAdditionOfNewBacklog(_backlogId, _tokens);
 	}
 
@@ -164,7 +154,6 @@ contract DevelopmentAcc is Ownable {
 			uint256 tokenAmt = backlogId2backlogDetails[_backlogId].totalTokens;
 			// release reserved tokens
 			totalTokensReserved = totalTokensReserved.sub(tokenAmt);
-			remainingTokensForBacklog = remainingTokensForBacklog.add(tokenAmt);
 			// update backlog details
 			backlogId2backlogDetails[_backlogId].totalTokens = 0;
 			backlogId2backlogDetails[_backlogId].totalVoters = 0;
@@ -191,8 +180,7 @@ contract DevelopmentAcc is Ownable {
 			backlogDetails backlogId = backlogId2backlogDetails[_backlogId];
 			uint256 tokens = backlogId.totalTokens;
 			// to subtract the previous token value from total
-			totalTokensReserved = totalTokensReserved.sub(tokens);
-			remainingTokensForBacklog = remainingTokensForBacklog.add(tokens);		
+			totalTokensReserved = totalTokensReserved.sub(tokens);		
 			if(tokens < _tokens) {
 					newTokens = _tokens.sub(tokens);
 			} else {
@@ -203,7 +191,6 @@ contract DevelopmentAcc is Ownable {
 			backlogId.totalTokens = newTotalTokens;
 			// to add the new calculated tokens to be reserved to total
 			totalTokensReserved = totalTokensReserved.add(newTotalTokens);
-			remainingTokensForBacklog = remainingTokensForBacklog.sub(newTotalTokens);
 			SuccessfulUpdateOfBacklog(_backlogId, _tokens);
 	}
 
@@ -251,9 +238,6 @@ contract DevelopmentAcc is Ownable {
             SuccessfulTokensTransferToWinners(_backlogId); 
 	} 
 
-	uint256 votersLength = 0;
-
-    function getVotersLength(uint256 _backlogId) view public returns (uint256, uint256) { return (votersLength, backlogId2backlogDetails[_backlogId].totalVoters); }
 
 	/// @notice Function to transfer tokens to Voters for given backlog-id
 	/// @dev As backlog-Id is mapped with tokensPerVoter. We need not to recalculate or pass it from php. This will be handled withing the smart contract
@@ -268,8 +252,6 @@ contract DevelopmentAcc is Ownable {
 			require(_voters.length <= 20);
 			require(backlogId2backlogDetails[_backlogId].statusValue == 4); 
 			require(backlogId2backlogDetails[_backlogId].totalVotersPaid.add(_voters.length) <= backlogId2backlogDetails[_backlogId].totalVoters); 
-
-			votersLength = _voters.length;
 
 			address[] memory voters = _voters;
 			uint256 tokens = backlogId2backlogDetails[_backlogId].tokensPerVoter;
@@ -431,6 +413,16 @@ contract DevelopmentAcc is Ownable {
   	}
 
 
+  	function remainingTokens() 
+  	private
+  	view
+  	returns (uint256 _remainingTokens)
+  	{
+  			_remainingTokens = aegisCoin.balanceOf(address(this)).sub(totalTokensReserved);
+  			return;
+  	}
+
+
 	/* **************************************************************************************************************************
 	 *	Getter Methods
 	 */
@@ -527,7 +519,7 @@ contract DevelopmentAcc is Ownable {
 	public
 	returns (uint256)
 	{
-			return remainingTokensForBacklog;
+			return remainingTokens();
 	}
 
 

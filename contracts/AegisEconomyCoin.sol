@@ -29,7 +29,6 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     uint256 private constant    inflationRateAfterThreeYears = 1000;      // 10%
     uint256 private constant    totalDaysInNonLeapYear = 365 days;
     
-    uint256 private             releasedTokens;
     uint    private             percentageForBusiness;
     uint    private             percentageForDevelopment;  
     
@@ -83,8 +82,8 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
             }
             require (amount != 0);
             mint(owner, amount);
-            supplyPerDay = amount.div(365);             // 1000 tokens
-            creditContracts();                          // dev: 500 tokens; busi: 500 tokens                            
+            supplyPerDay = amount.div(365);   
+            creditContracts();                                
     }
 
 
@@ -187,7 +186,6 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
             
             transfer(businessContract, tokensForDev);
             transfer(developmentContract, tokensForBusi);
-            developmentContract.creditRemainingTokens(tokensForDev);
     }
 
 
