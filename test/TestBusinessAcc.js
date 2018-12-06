@@ -90,5 +90,4 @@ contract('Business Contract', async (accounts) => {
               
               await tryCatch(businessContract.changeOwnerAddress(null_address), errTypes.revert);
           });
-
 });
