@@ -1,48 +1,54 @@
 pragma solidity ^0.4.24;
 
-import "./contracts/ownership/Ownable.sol";
-import "./AegisEconomyCoin.sol";
+import "./Ownable.sol";
+
+// interface AegisEconomyCoin
+contract AegisEconomyCoin {
+    function transfer(address _receiver, uint256 _value) public;
+    function balanceOf(address) public;
+}
 
 contract BusinessAcc is Ownable {
 
- 	AegisEconomyCoin public aegisCoin;
+    AegisEconomyCoin public aegisCoin;
 
- 	/// Modifier to allow only aegisCoin contract to call a method
- 	modifier onlyAdmin() {
-     		require (msg.sender == address(aegisCoin));
-     		_;
-  	} 
+    /// Modifier to allow only aegisCoin contract to call a method
+    modifier onlyAdmin() {
+            require (msg.sender == address(aegisCoin));
+            _;
+    } 
 
- 	/// @author Gagandeep_HashCode
+    /// @author Gagandeep_HashCode
     /// @notice Contructor for initial setup
-	constructor (AegisEconomyCoin _address) 
-	{
-			require(_address != address(0));
-			aegisCoin = _address;
-	}
+    constructor (AegisEconomyCoin _address) 
+    public
+    {
+            require(_address != address(0));
+            aegisCoin = _address;
+    }
 
 
-	/// @notice Function to transfer business funds to any address
-	/// @param _receiver Receiver's address
-	/// @param _value Amount of tokens to be sent
-	function transferTokens(address _receiver, uint256 _value) 
-	onlyAdmin 
-	public 
-	{
-			aegisCoin.transfer(_receiver, _value);
-	}
+    /// @notice Function to transfer business funds to any address
+    /// @param _receiver Receiver's address
+    /// @param _value Amount of tokens to be sent
+    function transferTokens(address _receiver, uint256 _value) 
+    onlyAdmin 
+    public 
+    {
+            aegisCoin.transfer(_receiver, _value);
+    }
 
-	function changeOwnerAddress(address _newOwner)
+    function changeOwnerAddress(address _newOwner)
     onlyOwner
     public
     {
-        	require(_newOwner != address(0));
+            require(_newOwner != address(0));
             transferOwnership(_newOwner);
     }
 
-	// ========================= Getter Methods ===============================
+    // ========================= Getter Methods ===============================
 
-	function getOwner()
+    function getOwner()
     public
     view
     returns (address)
@@ -56,6 +62,6 @@ contract BusinessAcc is Ownable {
     view 
     returns (address) 
     {
-	        return aegisCoin;
+            return aegisCoin;
     }
 }

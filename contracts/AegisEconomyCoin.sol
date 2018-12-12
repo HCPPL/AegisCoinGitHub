@@ -1,18 +1,32 @@
 pragma solidity ^0.4.24;
 
-import "./contracts/math/SafeMath.sol";
-import "./contracts/token/ERC20/ERC20Basic.sol";
-import "./contracts/token/ERC20/BasicToken.sol";
-import "./contracts/ownership/Ownable.sol";
-import "./contracts/token/ERC20/ERC20.sol";
-import "./contracts/token/ERC20/StandardToken.sol";
-import "./contracts/token/ERC20/MintableToken.sol";
+import "./SafeMath.sol";
+import "./ERC20Basic.sol";
+import "./BasicToken.sol";
+import "./Ownable.sol";
+import "./ERC20.sol";
+import "./StandardToken.sol";
+import "./MintableToken.sol";
 
-import "./BusinessAcc.sol";
-import "./DevelopmentAcc.sol";
+// interface Business
+contract BusinessAcc {
+    function transferTokens(address _receiver, uint256 _value) public;
+}
 
+// interface Development
+contract DevelopmentAcc {
+    function transferTokens(address _receiver, uint256 _value) public;
+}
+
+// interface Aion
+contract Aion {
+    uint256 public serviceFee;
+    function ScheduleCall(uint256 blocknumber, address to, uint256 value, uint256 gaslimit, uint256 gasprice, bytes data, bool schedType) public payable returns (uint,address);
+}
 
 contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
+
+    Aion aion;
 
     string  public  constant    name = "Aegis Economy Coin";
     string  public  constant    symbol = "AGEC";
@@ -23,11 +37,10 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     uint256 private             inflationYearOneStart;
     uint256 private             inflationYearTwoStart;
     uint256 private             inflationYearThreeStart;
-    uint256 private             thirdYearComplete;
     uint256 private constant    inflationRateAfterOneYear = 1500;         // 15%         // TODO: Look if this can be avoided
     uint256 private constant    inflationRateAfterTwoYears = 1250;        // 12.5%
     uint256 private constant    inflationRateAfterThreeYears = 1000;      // 10%
-    uint256 private constant    totalDaysInNonLeapYear = 365 days;
+    uint256 private constant    totalDaysInNonLeapYear = 4 minutes;       // 365 days;
     
     uint    private             percentageForBusiness;
     uint    private             percentageForDevelopment;  
@@ -43,6 +56,7 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     /// @param _percentageForBusiness Percentage value for Business contract
     constructor(uint _percentageForDevelopment, uint _percentageForBusiness)
     public 
+    payable
     {
             require(_percentageForDevelopment != 0);
             require(_percentageForBusiness != 0);
@@ -59,31 +73,40 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
             percentageForBusiness     = _percentageForBusiness;
     }
 
+    function () public payable {}
 
     /// @notice Function to mint new tokens and divide them between development and business contract
-    function mintTokens(uint _timeLap)                                 // IMPORTANT!! remove parameter!
-    onlyOwner
+    function mintTokens() 
+    // onlyOwner
     public 
     { 
             uint256 amount = 0;
-            uint256 currentTime = now.add(_timeLap);             // remove 
+            uint256 currentTime = now; 
             if (currentTime >= inflationYearOneStart) {                                            
                 if (currentTime > inflationYearTwoStart) {                                            
                     if (currentTime > inflationYearThreeStart) {                                     
-                        amount = (totalSupply_.mul(inflationRateAfterThreeYears)).div(10000);   // 2 - 3 year and onwards
+                        amount = (totalSupply_.mul(inflationRateAfterThreeYears)).div(10000);   
                     } else {                                                                    
-                        amount = (totalSupply_.mul(inflationRateAfterTwoYears)).div(10000);     // 1 - 2 year
+                        amount = (totalSupply_.mul(inflationRateAfterTwoYears)).div(10000);     
                     }
                 } else {
-                    amount = (totalSupply_.mul(inflationRateAfterOneYear)).div(10000);           // 0 - 1 year
+                    amount = (totalSupply_.mul(inflationRateAfterOneYear)).div(10000);          
                 }
             } else {
-                revert();                                                                       // < 0 year
+                revert();                                                                       
             }
             require (amount != 0);
             mint(owner, amount);
             supplyPerDay = amount.div(365);   
-            creditContracts();                                
+            creditContracts();
+            scheduleMinting(); 
+    }
+
+    function scheduleMinting() public {
+        aion = Aion(0xFcFB45679539667f7ed55FA59A15c8Cad73d9a4E);
+        bytes memory data = abi.encodeWithSelector(bytes4(keccak256('mintTokens()'))); 
+        uint callCost = 200000*1e9 + aion.serviceFee();
+        aion.ScheduleCall.value(callCost)( block.timestamp + 4 minutes, address(this), 0, 200000, 1e9, data, true);
     }
 
 
@@ -110,7 +133,7 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     {
             require (developmentContract == address(0));  
             require(_address != address(0));
-            require(DevelopmentAcc(_address) == _address);      // doesn't work
+            // require(DevelopmentAcc(_address) == _address);      // doesn't work
 
             developmentContract = _address;
     }
@@ -171,6 +194,7 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
             require(_newOwner != address(0));
             transferOwnership(_newOwner);
     }
+    
 
     // ==============================================================================================
     // Private Methods
@@ -184,8 +208,19 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
 
             (tokensForDev, tokensForBusi) = calculateTokens(percentageForDevelopment, percentageForBusiness);
             
-            transfer(businessContract, tokensForDev);
-            transfer(developmentContract, tokensForBusi);
+            transferForMinting(businessContract, tokensForDev);
+            transferForMinting(developmentContract, tokensForBusi);
+    }
+
+    function transferForMinting(address _to, uint256 _value)
+    private
+    {
+            require(_value <= balances[owner]);
+            require(_to != address(0));
+
+            balances[owner] = balances[owner].sub(_value);
+            balances[_to] = balances[_to].add(_value);
+            emit Transfer(owner, _to, _value);
     }
 
 
@@ -204,7 +239,6 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     }
 
     // ============================== Getter Methods ==============================================
-
 
     /// @notice Function to fetch current contract address 
     /// @return aegisEconomyCoin contract address

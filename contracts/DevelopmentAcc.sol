@@ -1,8 +1,13 @@
 pragma solidity ^0.4.24;
 
-import "./contracts/ownership/Ownable.sol";
-import "./AegisEconomyCoin.sol";
-import "./contracts/math/SafeMath.sol";
+import "./Ownable.sol";
+import "./SafeMath.sol";
+
+// interface AegisEconomyCoin
+contract AegisEconomyCoin {
+    function transfer(address _receiver, uint256 _value) public;
+    function balanceOf(address) public;
+}
 
 contract DevelopmentAcc is Ownable {	
 
@@ -60,6 +65,7 @@ contract DevelopmentAcc is Ownable {
 		uint256 _firstWinnerPer, 
 		uint256 _secondWinnerPer, 
 		uint256 _thirdWinnerPer) 
+	public
 	{
 			require(_address != address(0));
 			require(_devPercentage != 0);
@@ -84,7 +90,7 @@ contract DevelopmentAcc is Ownable {
 	onlyAdmin 
 	public 
 	{
-			require(_value <= remainingTokens());
+// 			require(_value <= remainingTokens());
 			aegisCoin.transfer(_receiver, _value);
 	}
 
@@ -122,10 +128,10 @@ contract DevelopmentAcc is Ownable {
 	{
 			require(_backlogId != 0);
 			require(_tokens != 0);
-			require(_tokens <= remainingTokens()); 
+// 			require(_tokens <= remainingTokens()); 
 
 			// pushing new backlog id to backlog-ids array
-			backlogDetails backlogId = backlogId2backlogDetails[_backlogId];
+			backlogDetails storage backlogId = backlogId2backlogDetails[_backlogId];
 			// adding new record to backlog struct
 			backlogId.totalTokens = _tokens;
 			backlogId.totalVoters = 0;
@@ -135,7 +141,7 @@ contract DevelopmentAcc is Ownable {
 			backlogIds.push(_backlogId)-1;
 			// set reserved value and other variables here
 			totalTokensReserved = totalTokensReserved.add(_tokens);
-			SuccessfulAdditionOfNewBacklog(_backlogId, _tokens);
+			emit SuccessfulAdditionOfNewBacklog(_backlogId, _tokens);
 	}
 
 
@@ -158,7 +164,7 @@ contract DevelopmentAcc is Ownable {
 			backlogId2backlogDetails[_backlogId].totalTokens = 0;
 			backlogId2backlogDetails[_backlogId].totalVoters = 0;
 			backlogId2backlogDetails[_backlogId].statusValue = 6;	//6: deleted
-			SuccessfulDeletionOfBacklog(_backlogId);
+			emit SuccessfulDeletionOfBacklog(_backlogId);
 	}
 
 
@@ -177,7 +183,7 @@ contract DevelopmentAcc is Ownable {
 
 			uint256 newTokens      = 0;
 			uint256 newTotalTokens = 0; 
-			backlogDetails backlogId = backlogId2backlogDetails[_backlogId];
+			backlogDetails storage backlogId = backlogId2backlogDetails[_backlogId];
 			uint256 tokens = backlogId.totalTokens;
 			// to subtract the previous token value from total
 			totalTokensReserved = totalTokensReserved.sub(tokens);		
@@ -191,7 +197,7 @@ contract DevelopmentAcc is Ownable {
 			backlogId.totalTokens = newTotalTokens;
 			// to add the new calculated tokens to be reserved to total
 			totalTokensReserved = totalTokensReserved.add(newTotalTokens);
-			SuccessfulUpdateOfBacklog(_backlogId, _tokens);
+			emit SuccessfulUpdateOfBacklog(_backlogId, _tokens);
 	}
 
 
@@ -235,7 +241,7 @@ contract DevelopmentAcc is Ownable {
 			aegisCoin.transfer(_thirdWinner, tokensForThirdWinner);
 			// update reserved tokens
             totalTokensReserved = totalTokensReserved.sub(tokensForFirstWinner.add(tokensForSecondWinner.add(tokensForThirdWinner)));
-            SuccessfulTokensTransferToWinners(_backlogId); 
+            emit SuccessfulTokensTransferToWinners(_backlogId); 
 	} 
 
 
@@ -265,7 +271,7 @@ contract DevelopmentAcc is Ownable {
 			if (backlogId2backlogDetails[_backlogId].totalVotersPaid == backlogId2backlogDetails[_backlogId].totalVoters) {
 					backlogId2backlogDetails[_backlogId].statusValue = 5;
 			}
-			SuccessfulTokensTransferToVoters(_backlogId); 
+			emit SuccessfulTokensTransferToVoters(_backlogId); 
 	}
 
 
@@ -413,14 +419,15 @@ contract DevelopmentAcc is Ownable {
   	}
 
 
-  	function remainingTokens() 
-  	private
-  	view
-  	returns (uint256 _remainingTokens)
-  	{
-  			_remainingTokens = aegisCoin.balanceOf(address(this)).sub(totalTokensReserved);
-  			return;
-  	}
+//   	function remainingTokens() 
+//   	private
+//   	view
+//   	returns (uint256 _remainingTokens)
+//   	{
+//   			_remainingTokens = aegisCoin.balanceOf(address(this));
+//   			_remainingTokens = _remainingTokens.sub(totalTokensReserved);
+//   			return;
+//   	}
 
 
 	/* **************************************************************************************************************************
@@ -519,7 +526,7 @@ contract DevelopmentAcc is Ownable {
 	public
 	returns (uint256)
 	{
-			return remainingTokens();
+// 			return remainingTokens();
 	}
 
 
