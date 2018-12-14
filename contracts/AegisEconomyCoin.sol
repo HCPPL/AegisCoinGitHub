@@ -18,15 +18,7 @@ contract DevelopmentAcc {
     function transferTokens(address _receiver, uint256 _value) public;
 }
 
-// interface Aion
-contract Aion {
-    uint256 public serviceFee;
-    function ScheduleCall(uint256 blocknumber, address to, uint256 value, uint256 gaslimit, uint256 gasprice, bytes data, bool schedType) public payable returns (uint,address);
-}
-
 contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
-
-    Aion aion;
 
     string  public  constant    name = "Aegis Economy Coin";
     string  public  constant    symbol = "AGEC";
@@ -40,23 +32,22 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     uint256 private constant    inflationRateAfterOneYear = 1500;         // 15%         // TODO: Look if this can be avoided
     uint256 private constant    inflationRateAfterTwoYears = 1250;        // 12.5%
     uint256 private constant    inflationRateAfterThreeYears = 1000;      // 10%
-    uint256 private constant    totalDaysInNonLeapYear = 4 minutes;       // 365 days;
-    
+    uint256 private constant    totalDaysInNonLeapYear = 365 days;
+    uint256 private             mintingCounter;
+
     uint    private             percentageForBusiness;
     uint    private             percentageForDevelopment;  
     
     BusinessAcc    private      businessContract;           
     DevelopmentAcc private      developmentContract;     
 
-    // Reserch: Coin Minted HISTORY // Events
-    
+   
     /// @author Gagandeep_HashCode
     /// @notice Contructor for initial setup
     /// @param _percentageForDevelopment Percentage value for Development contract
     /// @param _percentageForBusiness Percentage value for Business contract
     constructor(uint _percentageForDevelopment, uint _percentageForBusiness)
     public 
-    payable
     {
             require(_percentageForDevelopment != 0);
             require(_percentageForBusiness != 0);
@@ -65,23 +56,59 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
             owner                     = msg.sender;
             balances[msg.sender]      = initialSupply;
             totalSupply_              = initialSupply;
-            supplyPerDay              = totalSupply_.div(365);
+            supplyPerDay              = 0;
             inflationYearOneStart     = now;
+            mintingCounter            = 0;
             inflationYearTwoStart     = inflationYearOneStart.add(totalDaysInNonLeapYear); 
             inflationYearThreeStart   = inflationYearTwoStart.add(totalDaysInNonLeapYear);
             percentageForDevelopment  = _percentageForDevelopment; 
             percentageForBusiness     = _percentageForBusiness;
     }
 
-    function () public payable {}
 
-    /// @notice Function to mint new tokens and divide them between development and business contract
-    function mintTokens() 
+    // /// @notice Function to mint new tokens and divide them between development and business contract
+    // function mintTokens() 
     // onlyOwner
+    // public 
+    // { 
+    //         uint256 amount = 0;
+    //         uint256 currentTime = now; 
+    //         if (currentTime >= inflationYearOneStart) {                                            
+    //             if (currentTime > inflationYearTwoStart) {                                            
+    //                 if (currentTime > inflationYearThreeStart) {                                     
+    //                     amount = (totalSupply_.mul(inflationRateAfterThreeYears)).div(10000);   
+    //                 } else {                                                                    
+    //                     amount = (totalSupply_.mul(inflationRateAfterTwoYears)).div(10000);     
+    //                 }
+    //             } else {
+    //                 amount = (totalSupply_.mul(inflationRateAfterOneYear)).div(10000);          
+    //             }
+    //         } else {
+    //             revert();                                                                       
+    //         }
+    //         require (amount != 0);
+    //         mint(owner, amount);
+    //         supplyPerDay = amount.div(365);   
+    //         creditContracts();
+    // }
+
+
+    /// @notice Function to mint new tokens every day and divide them between development and business contract
+    function mintTokens() 
+    onlyOwner
     public 
     { 
             uint256 amount = 0;
-            uint256 currentTime = now; 
+            uint256 currentTime = now;
+
+            if (mintingCounter == 0) {
+                mintingCounter = now;
+            }
+
+            require(developmentContract != address(0));
+            require(businessContract != address(0));
+            require (currentTime >= mintingCounter);    // this ensures that minting is not called more than once in a day
+
             if (currentTime >= inflationYearOneStart) {                                            
                 if (currentTime > inflationYearTwoStart) {                                            
                     if (currentTime > inflationYearThreeStart) {                                     
@@ -96,21 +123,13 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
                 revert();                                                                       
             }
             require (amount != 0);
-            mint(owner, amount);
             supplyPerDay = amount.div(365);   
+            mint(owner, supplyPerDay);
+            mintingCounter = mintingCounter.add(86400);     // counter updated to next day; 24 hours = 86400 seconds
             creditContracts();
-            scheduleMinting(); 
-    }
-
-    function scheduleMinting() public {
-        aion = Aion(0xFcFB45679539667f7ed55FA59A15c8Cad73d9a4E);
-        bytes memory data = abi.encodeWithSelector(bytes4(keccak256('mintTokens()'))); 
-        uint callCost = 200000*1e9 + aion.serviceFee();
-        aion.ScheduleCall.value(callCost)( block.timestamp + 4 minutes, address(this), 0, 200000, 1e9, data, true);
     }
 
 
-    // TODO: Parameter should be contract address type
     /// @notice Function to link business contract
     /// @param _address Business Contract Address
     function setBusinessAcc(BusinessAcc _address) 
@@ -119,12 +138,10 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     {            
             require (businessContract == address(0)); 
             require(_address != address(0));
-
             businessContract = _address;
     }
 
 
-    // TODO: Parameter should be contract address type
     /// @notice Function to link development contract
     /// @param _address Development Contract Address
     function setDevelopmentAcc(DevelopmentAcc _address)  
@@ -133,8 +150,6 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     {
             require (developmentContract == address(0));  
             require(_address != address(0));
-            // require(DevelopmentAcc(_address) == _address);      // doesn't work
-
             developmentContract = _address;
     }
    
@@ -186,15 +201,6 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
         percentageForDevelopment = _percentageForDevelopment;
         percentageForBusiness = _percentageForBusiness;
     }
-
-    function changeOwnerAddress(address _newOwner)
-    onlyOwner
-    public
-    {
-            require(_newOwner != address(0));
-            transferOwnership(_newOwner);
-    }
-    
 
     // ==============================================================================================
     // Private Methods
@@ -293,13 +299,13 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     }
 
 
-    function getOwner()
-    public
-    view
-    returns (address)
-    {
-            return owner;
-    }
+    // function getOwner()
+    // public
+    // view
+    // returns (address)
+    // {
+    //         return owner;
+    // }
 
 
     function getInflationPeriodInDays() 
