@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 
 import "./Ownable.sol";
 
-// interface AegisEconomyCoin
 contract AegisEconomyCoin {
     function transfer(address _receiver, uint256 _value) public;
     function balanceOf(address) public;
@@ -38,23 +37,16 @@ contract BusinessAcc is Ownable {
             aegisCoin.transfer(_receiver, _value);
     }
 
-    function changeOwnerAddress(address _newOwner)
-    onlyOwner
-    public
-    {
-            require(_newOwner != address(0));
-            transferOwnership(_newOwner);
-    }
 
     // ========================= Getter Methods ===============================
 
-    function getOwner()
-    public
-    view
-    returns (address)
-    {
-            return owner;
-    }
+    // function getOwner()
+    // public
+    // view
+    // returns (address)
+    // {
+    //         return owner;
+    // }
 
 
     function getAegisCoinAddress() 
