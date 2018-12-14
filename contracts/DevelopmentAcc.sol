@@ -3,10 +3,9 @@ pragma solidity ^0.4.24;
 import "./Ownable.sol";
 import "./SafeMath.sol";
 
-// interface AegisEconomyCoin
 contract AegisEconomyCoin {
     function transfer(address _receiver, uint256 _value) public;
-    function balanceOf(address) public;
+    function balanceOf(address) public view returns (uint256);
 }
 
 contract DevelopmentAcc is Ownable {	
@@ -56,7 +55,6 @@ contract DevelopmentAcc is Ownable {
   	event SuccessfulTokensTransferToVoters(uint256 _backlogId);
 
 	
-	// Pending: check for : address should be of type contract address
 	/// @author Gagandeep_HashCode
     /// @notice Contructor for initial setup
 	constructor (AegisEconomyCoin _address, 
@@ -90,7 +88,7 @@ contract DevelopmentAcc is Ownable {
 	onlyAdmin 
 	public 
 	{
-// 			require(_value <= remainingTokens());
+			require(_value <= remainingTokens());		
 			aegisCoin.transfer(_receiver, _value);
 	}
 
@@ -128,7 +126,7 @@ contract DevelopmentAcc is Ownable {
 	{
 			require(_backlogId != 0);
 			require(_tokens != 0);
-// 			require(_tokens <= remainingTokens()); 
+			require(_tokens <= remainingTokens());	 
 
 			// pushing new backlog id to backlog-ids array
 			backlogDetails storage backlogId = backlogId2backlogDetails[_backlogId];
@@ -181,22 +179,11 @@ contract DevelopmentAcc is Ownable {
 			require(backlogId2backlogDetails[_backlogId].statusValue >= 0);
 			require(backlogId2backlogDetails[_backlogId].statusValue < 2);
 
-			uint256 newTokens      = 0;
-			uint256 newTotalTokens = 0; 
 			backlogDetails storage backlogId = backlogId2backlogDetails[_backlogId];
 			uint256 tokens = backlogId.totalTokens;
-			// to subtract the previous token value from total
-			totalTokensReserved = totalTokensReserved.sub(tokens);		
-			if(tokens < _tokens) {
-					newTokens = _tokens.sub(tokens);
-			} else {
-				    newTokens = tokens.sub(_tokens);
-			}
-			newTotalTokens = tokens.add(newTokens);
-			// update backlog details
-			backlogId.totalTokens = newTotalTokens;
-			// to add the new calculated tokens to be reserved to total
-			totalTokensReserved = totalTokensReserved.add(newTotalTokens);
+			totalTokensReserved = totalTokensReserved.sub(tokens);
+			totalTokensReserved = totalTokensReserved.add(_tokens);
+			backlogId.totalTokens = _tokens;
 			emit SuccessfulUpdateOfBacklog(_backlogId, _tokens);
 	}
 
@@ -322,16 +309,6 @@ contract DevelopmentAcc is Ownable {
 			backlogId2backlogDetails[_backlogId].statusValue = backlogId2backlogDetails[_backlogId].statusValue.add(1);
 	}
 
-
-    function changeOwnerAddress(address _newOwner)
-    onlyOwner
-    public
-    {
-	        require(_newOwner != address(0));
-	        transferOwnership(_newOwner);
-    }
-
-
  	/* **************************************************************************************************************************
   	*	Private Methods
   	*/
@@ -419,15 +396,15 @@ contract DevelopmentAcc is Ownable {
   	}
 
 
-//   	function remainingTokens() 
-//   	private
-//   	view
-//   	returns (uint256 _remainingTokens)
-//   	{
-//   			_remainingTokens = aegisCoin.balanceOf(address(this));
-//   			_remainingTokens = _remainingTokens.sub(totalTokensReserved);
-//   			return;
-//   	}
+  	function remainingTokens() 
+  	private
+  	view
+  	returns (uint256 _remainingTokens)
+  	{
+  			_remainingTokens = aegisCoin.balanceOf(address(this));
+  			_remainingTokens = _remainingTokens.sub(totalTokensReserved);
+  			return;
+  	}
 
 
 	/* **************************************************************************************************************************
@@ -526,7 +503,7 @@ contract DevelopmentAcc is Ownable {
 	public
 	returns (uint256)
 	{
-// 			return remainingTokens();
+			return remainingTokens();	
 	}
 
 
@@ -542,15 +519,12 @@ contract DevelopmentAcc is Ownable {
   		return value;
   	}
 
-  	function getOwner()
-    public
-    view
-    returns (address)
-    {
-            return owner;
-    }
+  	// function getOwner()
+   //  public
+   //  view
+   //  returns (address)
+   //  {
+   //          return owner;
+   //  }
 
-
-    // Our service to check if gas is exhausted or not. There should be enough ethers to execute all the method calls that are inline.
-    // TODO: Reggresive testing for gas exhaustion
 }
