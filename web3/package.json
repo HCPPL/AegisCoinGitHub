@@ -1,0 +1,21 @@
+{
+  "name": "aegiscoin",
+  "version": "1.0.0",
+  "description": "Token Rewards for Solution to Backlogs",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "gayathridevi",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^6.2.0",
+    "ethereumjs-tx": "^1.3.7",
+    "express": "^4.16.4",
+    "web3": "^1.0.0-beta.36",
+    "web3js-raw": "0.0.2-beta.16"
+  }
+}
