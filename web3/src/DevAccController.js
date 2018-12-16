@@ -30,5 +30,27 @@ router.post('/addBacklog/:id/:token', function (req, res) {
     });
 });
 
+/**
+ * Endpoint URL to POST setBacklogStatus function.
+ * @author GayathrideviHashCode
+ * @param  {string} id      Backlog Id to be added.
+ * @param  {string} status  Update the Backlog status.
+ * @return transaction reciept as JSON response.
+ */
+router.post('/updateBacklogStatus/:id/:status', function (req, res) {
+    var retVal;
+    var functionName = 'setBacklogStatus';
+    var params = [req.params.id, req.params.status];
+    W3JSR.prepareSignSend(DevAccInfo.Params.ABI,DevAccInfo.Params.ADDRESS,functionName,DevAccInfo.Params.ETHER_ACC,DevAccInfo.Params.ETHER_PKEY,params)
+    .then((result,error) =>{
+        console.log(result);
+        res.status(200).send(JSON.stringify(result));
+    },(error) =>{
+        console.log(error);
+        retVal = {"Error":error};
+        res.status(200).send(JSON.stringify(retVal));
+    });
+});
+
 //Export the router to send the JSON response
 module.exports = router;
