@@ -5,7 +5,7 @@ var source = fs.readFileSync('./build/contracts/DevelopmentAcc.json', 'utf8');
 
 const Params = {
     ABI: JSON.parse(source)["abi"],
-    ADDRESS: JSON.parse(source)["networks"]["3"]["address"], //Set the relevant Network Id
+    ADDRESS: JSON.parse(source)["networks"][BCInfo.Params.CHAIN_ID]["address"], //Set the relevant Network Id
     ETHER_ACC : BCInfo.Params.ETHER_ACC,
     ETHER_PKEY : new Buffer(BCInfo.Params.PVT_KEY, 'hex')
 };
