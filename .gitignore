@@ -1,2 +1,12 @@
 #ignore the BlockchainInfo file
-BlockchainInfo.js
+.BlockchainInfo.js
+
+#ignore the Node files
+node_modules/
+
+#ignore build files
+build/
+
+#ignore network script
+.truffle.js
+.truffle-config.js
