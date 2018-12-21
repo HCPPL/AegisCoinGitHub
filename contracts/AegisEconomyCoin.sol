@@ -33,7 +33,13 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     uint256 private constant    inflationRateAfterTwoYears = 1250;        // 12.5%
     uint256 private constant    inflationRateAfterThreeYears = 1000;      // 10%
     uint256 private constant    totalDaysInNonLeapYear = 365 days;
+    
     uint256 private             mintingCounter;
+    uint256 private             yearCounter;
+    uint256                     totalSupplyForMintingRecorded;
+    uint256                     inflationRate;
+    uint256 public              calculationYearsPassed;
+    uint256 private             inflationStarted;
 
     uint    private             percentageForBusiness;
     uint    private             percentageForDevelopment;  
@@ -57,41 +63,36 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
             balances[msg.sender]      = initialSupply;
             totalSupply_              = initialSupply;
             supplyPerDay              = 0;
-            inflationYearOneStart     = now;
+            inflationYearOneStart     = now;        // starts in minting tbd
             mintingCounter            = 0;
+            yearCounter               = 0;
+            totalSupplyForMintingRecorded = 0;
             inflationYearTwoStart     = inflationYearOneStart.add(totalDaysInNonLeapYear); 
             inflationYearThreeStart   = inflationYearTwoStart.add(totalDaysInNonLeapYear);
             percentageForDevelopment  = _percentageForDevelopment; 
             percentageForBusiness     = _percentageForBusiness;
+
+            setRecorder(0);
     }
 
-
-    // /// @notice Function to mint new tokens and divide them between development and business contract
-    // function mintTokens() 
-    // onlyOwner
-    // public 
-    // { 
-    //         uint256 amount = 0;
-    //         uint256 currentTime = now; 
-    //         if (currentTime >= inflationYearOneStart) {                                            
-    //             if (currentTime > inflationYearTwoStart) {                                            
-    //                 if (currentTime > inflationYearThreeStart) {                                     
-    //                     amount = (totalSupply_.mul(inflationRateAfterThreeYears)).div(10000);   
-    //                 } else {                                                                    
-    //                     amount = (totalSupply_.mul(inflationRateAfterTwoYears)).div(10000);     
-    //                 }
-    //             } else {
-    //                 amount = (totalSupply_.mul(inflationRateAfterOneYear)).div(10000);          
-    //             }
-    //         } else {
-    //             revert();                                                                       
-    //         }
-    //         require (amount != 0);
-    //         mint(owner, amount);
-    //         supplyPerDay = amount.div(365);   
-    //         creditContracts();
-    // }
-
+    function setRecorder(uint256 _yearCounter)
+    private
+    {
+            // check for null value
+            
+            if (_yearCounter >= 2) {
+                    inflationRate = inflationRateAfterThreeYears;
+                    totalSupplyForMintingRecorded = totalSupply_;           
+            } else if (_yearCounter == 1) {
+                    inflationRate = inflationRateAfterTwoYears;
+                    totalSupplyForMintingRecorded = totalSupply_;           
+            } else if (_yearCounter == 0) {
+                    inflationRate = inflationRateAfterOneYear; 
+                    totalSupplyForMintingRecorded = totalSupply_;   // initial supply  
+            } else {
+                    revert();
+            }
+    }
 
     /// @notice Function to mint new tokens every day and divide them between development and business contract
     function mintTokens() 
@@ -100,28 +101,26 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     { 
             uint256 amount = 0;
             uint256 currentTime = now;
-
+            
             if (mintingCounter == 0) {
                 mintingCounter = now;
+                inflationStarted = now;
             }
+            
+            calculationYearsPassed = (currentTime.sub(inflationStarted)).div(365*24*60*60);  
+
+            // TODO: for testing purpose add another parameter for minting counter to calculate days
 
             require(developmentContract != address(0));
             require(businessContract != address(0));
-            require (currentTime >= mintingCounter);    // this ensures that minting is not called more than once in a day
+            require(currentTime >= mintingCounter);    // this ensures that minting is not called more than once in a day
 
-            if (currentTime >= inflationYearOneStart) {                                            
-                if (currentTime > inflationYearTwoStart) {                                            
-                    if (currentTime > inflationYearThreeStart) {                                     
-                        amount = (totalSupply_.mul(inflationRateAfterThreeYears)).div(10000);   
-                    } else {                                                                    
-                        amount = (totalSupply_.mul(inflationRateAfterTwoYears)).div(10000);     
-                    }
-                } else {
-                    amount = (totalSupply_.mul(inflationRateAfterOneYear)).div(10000);          
-                }
-            } else {
-                revert();                                                                       
+            if (calculationYearsPassed > yearCounter) {   // TBD: this will not record in case an year is skipped in between
+                    setRecorder(yearCounter);
+                    yearCounter = yearCounter+1;
             }
+
+            amount = (totalSupplyForMintingRecorded.mul(inflationRate)).div(10000); // variables are global and is handled in setRecord() 
             require (amount != 0);
             supplyPerDay = amount.div(365);   
             mint(owner, supplyPerDay);
@@ -297,15 +296,6 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     {
             return (percentageForDevelopment, percentageForBusiness);
     }
-
-
-    // function getOwner()
-    // public
-    // view
-    // returns (address)
-    // {
-    //         return owner;
-    // }
 
 
     function getInflationPeriodInDays() 
