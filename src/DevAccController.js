@@ -19,7 +19,8 @@ router.post('/addBacklog/:id/:token', function (req, res) {
     var retVal;
     var functionName = 'addNewBacklog';
     var params = [req.params.id, req.params.token];
-    W3JSR.prepareSignSend(DevAccInfo.Params.ABI,DevAccInfo.Params.ADDRESS,functionName,DevAccInfo.Params.ETHER_ACC,DevAccInfo.Params.ETHER_PKEY,params)
+    W3JSR.prepareSignSend(DevAccInfo.Params.ABI, DevAccInfo.Params.ADDRESS, functionName, DevAccInfo.Params.ETHER_ACC, 
+        DevAccInfo.Params.ETHER_PKEY, params)
     .then((result,error) =>{
         console.log(result);
         res.status(200).send(JSON.stringify(result));
@@ -41,7 +42,30 @@ router.post('/updateBacklogStatus/:id/:status', function (req, res) {
     var retVal;
     var functionName = 'setBacklogStatus';
     var params = [req.params.id, req.params.status];
-    W3JSR.prepareSignSend(DevAccInfo.Params.ABI,DevAccInfo.Params.ADDRESS,functionName,DevAccInfo.Params.ETHER_ACC,DevAccInfo.Params.ETHER_PKEY,params)
+    W3JSR.prepareSignSend(DevAccInfo.Params.ABI, DevAccInfo.Params.ADDRESS, functionName, DevAccInfo.Params.ETHER_ACC,
+        DevAccInfo.Params.ETHER_PKEY, params)
+    .then((result,error) =>{
+        console.log(result);
+        res.status(200).send(JSON.stringify(result));
+    },(error) =>{
+        console.log(error);
+        retVal = {"Error":error};
+        res.status(200).send(JSON.stringify(retVal));
+    });
+});
+
+/**
+ * Endpoint URL to POST transferOwnership function.
+ * @author GayathrideviHashCode
+ * @param  {string} newOwner  Backlog Id to be added.
+ * @return transaction reciept as JSON response.
+ */
+router.post('/changeOwnerAddress/:newOwner', function (req, res) {
+    var retVal;
+    var functionName = 'transferOwnership';
+    var params = [req.params.newOwner];
+    W3JSR.prepareSignSend(DevAccInfo.Params.ABI, DevAccInfo.Params.ADDRESS, functionName, DevAccInfo.Params.ETHER_ACC,
+        DevAccInfo.Params.ETHER_PKEY, params)
     .then((result,error) =>{
         console.log(result);
         res.status(200).send(JSON.stringify(result));
