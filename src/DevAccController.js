@@ -126,14 +126,94 @@ router.post('/updateWinnersPercentage/:IWinnerPct/:IIWinnerPct/:IIIWinnerPct', f
 /**
  * Endpoint URL to GET getDeveloperAndVoterPercentage function
  * @author GayathrideviHashCode
- * @return Balance of given address as JSON response
+ * @return Developer and Voter percentage as JSON response
  */
-router.get('/getBalanceOf/:address', function (req, res) {
+router.get('/getDeveloperAndVoterPercentage', function (req, res) {
     var retVal;
-    W3JSR.ContractInstance.methods.balanceOf(req.params.address).call().then(function(result){
+    W3JSR.ContractInstance.methods.getDeveloperAndVoterPercentage().call().then(function(result){
         if(result){
-            console.log("Balance of "+req.params.address+": ", result.valueOf());
-            retVal = {"Balance":result.valueOf()};
+            retVal = {"Result":result.valueOf()};
+            console.log(retVal);
+            res.status(200).send(JSON.stringify(retVal));
+        }
+        else{
+            retVal = {"Error":error};
+            res.status(200).send(JSON.stringify(retVal));
+        }
+    });
+});
+
+/**
+ * Endpoint URL to GET getWinnersPercentage function
+ * @author GayathrideviHashCode
+ * @return First three winner's percentage as JSON response
+ */
+router.get('/getWinnersPercentage', function (req, res) {
+    var retVal;
+    W3JSR.ContractInstance.methods.getWinnersPercentage().call().then(function(result){
+        if(result){
+            retVal = {"Result":result.valueOf()};
+            console.log(retVal);
+            res.status(200).send(JSON.stringify(retVal));
+        }
+        else{
+            retVal = {"Error":error};
+            res.status(200).send(JSON.stringify(retVal));
+        }
+    });
+});
+
+/**
+ * Endpoint URL to GET getBacklogStatus(_backlogId) function
+ * @author GayathrideviHashCode
+ * @param {string} id  Backlog Id to get it's Status
+ * @return Backlog Id status as JSON response
+ */
+router.get('/getBacklogStatus/:id', function (req, res) {
+    var retVal;
+    W3JSR.ContractInstance.methods.getBacklogStatus(req.param.id).call().then(function(result){
+        if(result){
+            retVal = {"BacklogStatus":result.valueOf()};
+            console.log(retVal);
+            res.status(200).send(JSON.stringify(retVal));
+        }
+        else{
+            retVal = {"Error":error};
+            res.status(200).send(JSON.stringify(retVal));
+        }
+    });
+});
+
+/**
+ * Endpoint URL to GET getTotalReservedTokens function
+ * @author GayathrideviHashCode
+ * @return Total Reserved Tokens as JSON response
+ */
+router.get('/getTotalReservedTokens', function (req, res) {
+    var retVal;
+    W3JSR.ContractInstance.methods.getTotalReservedTokens().call().then(function(result){
+        if(result){
+            retVal = {"TotalReserved":result.valueOf()};
+            console.log(retVal);
+            res.status(200).send(JSON.stringify(retVal));
+        }
+        else{
+            retVal = {"Error":error};
+            res.status(200).send(JSON.stringify(retVal));
+        }
+    });
+});
+
+/**
+ * Endpoint URL to GET getRemainingTokens function
+ * @author GayathrideviHashCode
+ * @return Remaining Tokens as JSON response
+ */
+router.get('/getRemainingTokens', function (req, res) {
+    var retVal;
+    W3JSR.ContractInstance.methods.getRemainingTokens().call().then(function(result){
+        if(result){
+            retVal = {"RemainingTokens":result.valueOf()};
             console.log(retVal);
             res.status(200).send(JSON.stringify(retVal));
         }
