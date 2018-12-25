@@ -55,9 +55,9 @@ router.post('/updateBacklogStatus/:id/:status', function (req, res) {
 });
 
 /**
- * Endpoint URL to POST transferOwnership function.
+ * Endpoint URL to POST transferOwnership(_address) function.
  * @author GayathrideviHashCode
- * @param  {string} newOwner  Backlog Id to be added.
+ * @param  {string} newOwner  New Owner to be assigned.
  * @return transaction reciept as JSON response.
  */
 router.post('/changeOwnerAddress/:newOwner', function (req, res) {
@@ -73,6 +73,74 @@ router.post('/changeOwnerAddress/:newOwner', function (req, res) {
         console.log(error);
         retVal = {"Error":error};
         res.status(200).send(JSON.stringify(retVal));
+    });
+});
+
+/**
+ * Endpoint URL to POST updateDeveloperVoterPercentage(_devPercentage, _voterPercentage) function.
+ * @author GayathrideviHashCode
+ * @param  {string} devPct   Developer percentage to update.
+ * @param  {string} votrPct  Voter percentage to update.
+ * @return transaction reciept as JSON response.
+ */
+router.post('/updateDeveloperVoterPercentage/:devPct/:votrPct', function (req, res) {
+    var retVal;
+    var functionName = 'updateDeveloperVoterPercentage';
+    var params = [req.params.devPct, req.params.votrPct];
+    W3JSR.prepareSignSend(DevAccInfo.Params.ABI, DevAccInfo.Params.ADDRESS, functionName, DevAccInfo.Params.ETHER_ACC,
+        DevAccInfo.Params.ETHER_PKEY, params)
+    .then((result,error) =>{
+        console.log(result);
+        res.status(200).send(JSON.stringify(result));
+    },(error) =>{
+        console.log(error);
+        retVal = {"Error":error};
+        res.status(200).send(JSON.stringify(retVal));
+    });
+});
+
+/**
+ * Endpoint URL to POST updateWinnersPercentage(_1stWinnerPercentae, _2ndWinnerPercentage, _3rdWinnerPercentage) function.
+ * @author GayathrideviHashCode
+ * @param  {string} IWinnerPct    First Winner percentage to update.
+ * @param  {string} IIWinnerPct   Second Winner percentage to update.
+ * @param  {string} IIIWinnerPct  Third Winner percentage to update.
+ * @return transaction reciept as JSON response.
+ */
+router.post('/updateWinnersPercentage/:IWinnerPct/:IIWinnerPct/:IIIWinnerPct', function (req, res) {
+    var retVal;
+    var functionName = 'updateWinnersPercentage';
+    var params = [req.params.IWinnerPct, req.params.IIWinnerPct, req.params.IIIWinnerPct];
+    W3JSR.prepareSignSend(DevAccInfo.Params.ABI, DevAccInfo.Params.ADDRESS, functionName, DevAccInfo.Params.ETHER_ACC,
+        DevAccInfo.Params.ETHER_PKEY, params)
+    .then((result,error) =>{
+        console.log(result);
+        res.status(200).send(JSON.stringify(result));
+    },(error) =>{
+        console.log(error);
+        retVal = {"Error":error};
+        res.status(200).send(JSON.stringify(retVal));
+    });
+});
+
+/**
+ * Endpoint URL to GET getDeveloperAndVoterPercentage function
+ * @author GayathrideviHashCode
+ * @return Balance of given address as JSON response
+ */
+router.get('/getBalanceOf/:address', function (req, res) {
+    var retVal;
+    W3JSR.ContractInstance.methods.balanceOf(req.params.address).call().then(function(result){
+        if(result){
+            console.log("Balance of "+req.params.address+": ", result.valueOf());
+            retVal = {"Balance":result.valueOf()};
+            console.log(retVal);
+            res.status(200).send(JSON.stringify(retVal));
+        }
+        else{
+            retVal = {"Error":error};
+            res.status(200).send(JSON.stringify(retVal));
+        }
     });
 });
 

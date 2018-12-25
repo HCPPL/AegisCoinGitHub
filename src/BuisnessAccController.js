@@ -9,9 +9,9 @@ router.use(bodyParser.json());
 var W3JSR = BusinessAccInfo.getWeb3R();
 
 /**
- * Endpoint URL to POST transferOwnership function.
+ * Endpoint URL to POST transferOwnership(_address) function.
  * @author GayathrideviHashCode
- * @param  {string} newOwner  Backlog Id to be added.
+ * @param  {string} newOwner  New Owner to be assigned.
  * @return transaction reciept as JSON response.
  */
 router.post('/changeOwnerAddress/:newOwner', function (req, res) {
