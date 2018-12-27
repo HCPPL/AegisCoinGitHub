@@ -11,8 +11,8 @@ var W3JSR = DevAccInfo.getWeb3R();
 /**
  * Endpoint URL to POST addNewBacklog function
  * @author GayathrideviHashCode
- * @param  {string} id     Backlog Id to be added
- * @param  {string} token  Set the default Token value
+ * @param  {number} id     Backlog Id to be added
+ * @param  {number} token  Set the default Token value
  * @return transaction hash as JSON response
  */
 router.post('/addBacklog/:id/:token', function (req, res) {
@@ -34,8 +34,8 @@ router.post('/addBacklog/:id/:token', function (req, res) {
 /**
  * Endpoint URL to POST setBacklogStatus function.
  * @author GayathrideviHashCode
- * @param  {string} id      Backlog Id to be added.
- * @param  {string} status  Update the Backlog status.
+ * @param  {number} id      Backlog Id to be added.
+ * @param  {number} status  Update the Backlog status.
  * @return transaction reciept as JSON response.
  */
 router.post('/updateBacklogStatus/:id/:status', function (req, res) {
@@ -79,8 +79,8 @@ router.post('/changeOwnerAddress/:newOwner', function (req, res) {
 /**
  * Endpoint URL to POST updateDeveloperVoterPercentage(_devPercentage, _voterPercentage) function.
  * @author GayathrideviHashCode
- * @param  {string} devPct   Developer percentage to update.
- * @param  {string} votrPct  Voter percentage to update.
+ * @param  {number} devPct   Developer percentage to update.
+ * @param  {number} votrPct  Voter percentage to update.
  * @return transaction reciept as JSON response.
  */
 router.post('/updateDeveloperVoterPercentage/:devPct/:votrPct', function (req, res) {
@@ -102,9 +102,9 @@ router.post('/updateDeveloperVoterPercentage/:devPct/:votrPct', function (req, r
 /**
  * Endpoint URL to POST updateWinnersPercentage(_1stWinnerPercentae, _2ndWinnerPercentage, _3rdWinnerPercentage) function.
  * @author GayathrideviHashCode
- * @param  {string} IWinnerPct    First Winner percentage to update.
- * @param  {string} IIWinnerPct   Second Winner percentage to update.
- * @param  {string} IIIWinnerPct  Third Winner percentage to update.
+ * @param  {number} IWinnerPct    First Winner percentage to update.
+ * @param  {number} IIWinnerPct   Second Winner percentage to update.
+ * @param  {number} IIIWinnerPct  Third Winner percentage to update.
  * @return transaction reciept as JSON response.
  */
 router.post('/updateWinnersPercentage/:IWinnerPct/:IIWinnerPct/:IIIWinnerPct', function (req, res) {
@@ -166,7 +166,7 @@ router.get('/getWinnersPercentage', function (req, res) {
 /**
  * Endpoint URL to GET getBacklogStatus(_backlogId) function
  * @author GayathrideviHashCode
- * @param {string} id  Backlog Id to get it's Status
+ * @param {number} id  Backlog Id to get it's Status
  * @return Backlog Id status as JSON response
  */
 router.get('/getBacklogStatus/:id', function (req, res) {
