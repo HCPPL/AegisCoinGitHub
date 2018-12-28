@@ -35,10 +35,9 @@ router.post('/addBacklog/:id/:token', function (req, res) {
  * Endpoint URL to POST setBacklogStatus function.
  * @author GayathrideviHashCode
  * @param  {number} id      Backlog Id to be added.
- * @param  {number} status  Update the Backlog status.
  * @return transaction reciept as JSON response.
  */
-router.post('/updateBacklogStatus/:id/:status', function (req, res) {
+router.post('/updateBacklogStatus/:id/', function (req, res) {
     var retVal;
     var functionName = 'updateBacklogStatus';
     var params = [req.params.id];
@@ -171,7 +170,7 @@ router.get('/getWinnersPercentage', function (req, res) {
  */
 router.get('/getBacklogStatus/:id', function (req, res) {
     var retVal;
-    W3JSR.ContractInstance.methods.getBacklogStatus(req.param.id).call().then(function(result){
+    W3JSR.ContractInstance.methods.getBacklogStatus(req.params.id).call().then(function(result){
         if(result){
             retVal = {"BacklogStatus":result.valueOf()};
             console.log(retVal);
