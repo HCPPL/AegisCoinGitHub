@@ -40,8 +40,8 @@ router.post('/addBacklog/:id/:token', function (req, res) {
  */
 router.post('/updateBacklogStatus/:id/:status', function (req, res) {
     var retVal;
-    var functionName = 'setBacklogStatus';
-    var params = [req.params.id, req.params.status];
+    var functionName = 'updateBacklogStatus';
+    var params = [req.params.id];
     W3JSR.prepareSignSend(DevAccInfo.Params.ABI, DevAccInfo.Params.ADDRESS, functionName, DevAccInfo.Params.ETHER_ACC,
         DevAccInfo.Params.ETHER_PKEY, params)
     .then((result,error) =>{
