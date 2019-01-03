@@ -52,16 +52,17 @@ router.get('/getBalanceOf/:address', function (req, res) {
     });
 });
 
-/**
- * Endpoint URL to POST transferOwnership(_address) function.
- * @author GayathrideviHashCode
- * @param  {string} newOwner  New Owner to be assigned.
+/*
+ * Endpoint URL to POST transfer function.
+ * @author GagandeepHashCode
+ * @param  {string} address  address of the recipent.
+ * @param  {number} token    tokens to be sent.
  * @return transaction reciept as JSON response.
- */
-router.post('/changeOwnerAddress/:newOwner', function (req, res) {
+ */ 
+router.post('/transfer/:address/:token', function (req, res) {
     var retVal;
-    var functionName = 'transferOwnership';
-    var params = [req.params.newOwner];
+    var functionName = 'transfer';
+    var params = [req.params.address, req.params.token];
     W3JSR.prepareSignSend(AegisCoinInfo.Params.ABI, AegisCoinInfo.Params.ADDRESS, functionName, AegisCoinInfo.Params.ETHER_ACC,
         AegisCoinInfo.Params.ETHER_PKEY, params)
     .then((result,error) =>{
@@ -74,15 +75,37 @@ router.post('/changeOwnerAddress/:newOwner', function (req, res) {
     });
 });
 
+// /**
+//  * Endpoint URL to POST transferOwnership(_address) function.
+//  * @author GayathrideviHashCode
+//  * @param  {string} newOwner  New Owner to be assigned.
+//  * @return transaction reciept as JSON response.
+//  */
+// router.post('/changeOwnerAddress/:newOwner', function (req, res) {
+//     var retVal;
+//     var functionName = 'transferOwnership';
+//     var params = [req.params.newOwner];
+//     W3JSR.prepareSignSend(AegisCoinInfo.Params.ABI, AegisCoinInfo.Params.ADDRESS, functionName, AegisCoinInfo.Params.ETHER_ACC,
+//         AegisCoinInfo.Params.ETHER_PKEY, params)
+//     .then((result,error) =>{
+//         console.log(result);
+//         res.status(200).send(JSON.stringify(result));
+//     },(error) =>{
+//         console.log(error);
+//         retVal = {"Error":error};
+//         res.status(200).send(JSON.stringify(retVal));
+//     });
+// });
+
 /**
  * Endpoint URL to POST mintTokens function.
  * @author GayathrideviHashCode
  * @return transaction reciept as JSON response.
  */
-router.post('/mintTokens', function (req, res) {
+router.post('/mintTokens/:days', function (req, res) {
     var retVal;
     var functionName = 'mintTokens';
-    var params = [];
+    var params = [req.params.days];
     W3JSR.prepareSignSend(AegisCoinInfo.Params.ABI, AegisCoinInfo.Params.ADDRESS, functionName, AegisCoinInfo.Params.ETHER_ACC,
         AegisCoinInfo.Params.ETHER_PKEY, params)
     .then((result,error) =>{
