@@ -32,12 +32,109 @@ router.post('/addBacklog/:id/:token', function (req, res) {
 });
 
 /**
- * Endpoint URL to POST setBacklogStatus function.
+ * Endpoint URL to POST deleteBacklog function
+ * @author GagandeepHashCode
+ * @param  {number} id     Backlog Id to be added
+ * @return transaction hash as JSON response
+ */
+router.post('/deleteBacklog/:id', function (req, res) {
+    var retVal;
+    var functionName = 'deleteBacklog';
+    var params = [req.params.id];
+    W3JSR.prepareSignSend(DevAccInfo.Params.ABI, DevAccInfo.Params.ADDRESS, functionName, DevAccInfo.Params.ETHER_ACC, 
+        DevAccInfo.Params.ETHER_PKEY, params)
+    .then((result,error) =>{
+        console.log(result);
+        res.status(200).send(JSON.stringify(result));
+    },(error) =>{
+        console.log(error);
+        retVal = {"error":error};
+        res.status(200).send(JSON.stringify(retVal));
+    });
+});
+
+/**
+ * Endpoint URL to POST updateBacklogAmount function
+ * @author GagandeepHashCode
+ * @param  {number} id     Backlog Id to be added
+ * @param  {number} token  Set the default Token value
+ * @return transaction hash as JSON response
+ */
+router.post('/updateBacklogAmount/:id/:token', function (req, res) {
+    var retVal;
+    var functionName = 'updateBacklogAmount';
+    var params = [req.params.id, req.params.token];
+    W3JSR.prepareSignSend(DevAccInfo.Params.ABI, DevAccInfo.Params.ADDRESS, functionName, DevAccInfo.Params.ETHER_ACC, 
+        DevAccInfo.Params.ETHER_PKEY, params)
+    .then((result,error) =>{
+        console.log(result);
+        res.status(200).send(JSON.stringify(result));
+    },(error) =>{
+        console.log(error);
+        retVal = {"error":error};
+        res.status(200).send(JSON.stringify(retVal));
+    });
+});
+
+/**
+ * Endpoint URL to POST releaseTokensToWinnersForCompleteBacklog function
+ * @author GagandeepHashCode
+ * @param  {number} id           Backlog Id to be added
+ * @param  {string} IWinner      address of first winner
+ * @param  {string} IIWinner     address of second winner
+ * @param  {string} IIIWinner    address of third winner
+ * @param  {number} totalVoters  Set total voters
+ * @return transaction hash as JSON response
+ */
+router.post('/releaseTokensToWinnersForCompleteBacklog/:id/:IWinner/:IIWinner/:IIIWinner/:totalVoters', function (req, res) {
+    var retVal;
+    var functionName = 'releaseTokensToWinnersForCompleteBacklog';
+    var params = [req.params.id, req.params.IWinner, req.params.IIWinner, req.params.IIIWinner, req.params.totalVoters];
+    W3JSR.prepareSignSend(DevAccInfo.Params.ABI, DevAccInfo.Params.ADDRESS, functionName, DevAccInfo.Params.ETHER_ACC, 
+        DevAccInfo.Params.ETHER_PKEY, params)
+    .then((result,error) =>{
+        console.log(result);
+        res.status(200).send(JSON.stringify(result));
+    },(error) =>{
+        console.log(error);
+        retVal = {"error":error};
+        res.status(200).send(JSON.stringify(retVal));
+    });
+});
+
+/**
+ * Endpoint URL to POST releaseTokensForVoters function
+ * @author GagandeepHashCode
+ * @param  {number} id      Backlog Id to be added
+ * @param  {string} voters  Set array of voters
+ * @return transaction hash as JSON response
+ */
+router.post('/releaseTokensForVoters/:id/:voters', function (req, res) {
+    var retVal;
+    var functionName = 'releaseTokensForVoters';
+    // var params = [req.params.id, [req.params.voters].concat(req.params[0].split('/').slice(1))];
+    var params = [req.params.id, req.params.voters.split(',')];
+
+    console.log(params);
+    W3JSR.prepareSignSend(DevAccInfo.Params.ABI, DevAccInfo.Params.ADDRESS, functionName, DevAccInfo.Params.ETHER_ACC, 
+        DevAccInfo.Params.ETHER_PKEY, params)
+    .then((result,error) =>{
+        console.log(result);
+        res.status(200).send(JSON.stringify(result));
+    },(error) =>{
+        console.log(error);
+        retVal = {"error":error};
+        res.status(200).send(JSON.stringify(retVal));
+    });
+});
+
+/**
+ * Endpoint URL to POST updateBacklogStatus function.
  * @author GayathrideviHashCode
  * @param  {number} id      Backlog Id to be added.
  * @return transaction reciept as JSON response.
  */
-router.post('/updateBacklogStatus/:id/', function (req, res) {
+router.post('/updateBacklogStatus/:id', function (req, res) {
     var retVal;
     var functionName = 'updateBacklogStatus';
     var params = [req.params.id];
@@ -53,27 +150,27 @@ router.post('/updateBacklogStatus/:id/', function (req, res) {
     });
 });
 
-/**
- * Endpoint URL to POST transferOwnership(_address) function.
- * @author GayathrideviHashCode
- * @param  {string} newOwner  New Owner to be assigned.
- * @return transaction reciept as JSON response.
- */
-router.post('/changeOwnerAddress/:newOwner', function (req, res) {
-    var retVal;
-    var functionName = 'transferOwnership';
-    var params = [req.params.newOwner];
-    W3JSR.prepareSignSend(DevAccInfo.Params.ABI, DevAccInfo.Params.ADDRESS, functionName, DevAccInfo.Params.ETHER_ACC,
-        DevAccInfo.Params.ETHER_PKEY, params)
-    .then((result,error) =>{
-        console.log(result);
-        res.status(200).send(JSON.stringify(result));
-    },(error) =>{
-        console.log(error);
-        retVal = {"Error":error};
-        res.status(200).send(JSON.stringify(retVal));
-    });
-});
+// /**
+//  * Endpoint URL to POST transferOwnership(_address) function.
+//  * @author GayathrideviHashCode
+//  * @param  {string} newOwner  New Owner to be assigned.
+//  * @return transaction reciept as JSON response.
+//  */
+// router.post('/changeOwnerAddress/:newOwner', function (req, res) {
+//     var retVal;
+//     var functionName = 'transferOwnership';
+//     var params = [req.params.newOwner];
+//     W3JSR.prepareSignSend(DevAccInfo.Params.ABI, DevAccInfo.Params.ADDRESS, functionName, DevAccInfo.Params.ETHER_ACC,
+//         DevAccInfo.Params.ETHER_PKEY, params)
+//     .then((result,error) =>{
+//         console.log(result);
+//         res.status(200).send(JSON.stringify(result));
+//     },(error) =>{
+//         console.log(error);
+//         retVal = {"Error":error};
+//         res.status(200).send(JSON.stringify(retVal));
+//     });
+// });
 
 /**
  * Endpoint URL to POST updateDeveloperVoterPercentage(_devPercentage, _voterPercentage) function.
