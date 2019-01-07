@@ -1,12 +1,8 @@
 pragma solidity ^0.4.24;
 
-import "./Ownable.sol";
-import "./SafeMath.sol";
-
-contract AegisEconomyCoin {
-    function transfer(address _receiver, uint256 _value) public;
-    function balanceOf(address) public view returns (uint256);
-}
+import "./contracts/ownership/Ownable.sol";
+import "./contracts/math/SafeMath.sol";
+import "./AegisEconomyCoin.sol";
 
 contract DevelopmentAcc is Ownable {	
 
@@ -519,12 +515,12 @@ contract DevelopmentAcc is Ownable {
   		return value;
   	}
 
-  	// function getOwner()
-   //  public
-   //  view
-   //  returns (address)
-   //  {
-   //          return owner;
-   //  }
+  	function getOwner()
+    public
+    view
+    returns (address)
+    {
+            return owner;
+    }
 
 }
