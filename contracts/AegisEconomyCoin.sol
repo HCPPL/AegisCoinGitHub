@@ -1,22 +1,15 @@
 pragma solidity ^0.4.24;
 
-import "./SafeMath.sol";
-import "./ERC20Basic.sol";
-import "./BasicToken.sol";
-import "./Ownable.sol";
-import "./ERC20.sol";
-import "./StandardToken.sol";
-import "./MintableToken.sol";
+import "./contracts/math/SafeMath.sol";
+import "./contracts/token/ERC20/ERC20Basic.sol";
+import "./contracts/token/ERC20/BasicToken.sol";
+import "./contracts/ownership/Ownable.sol";
+import "./contracts/token/ERC20/ERC20.sol";
+import "./contracts/token/ERC20/StandardToken.sol";
+import "./contracts/token/ERC20/MintableToken.sol";
 
-// interface Business
-contract BusinessAcc {
-    function transferTokens(address _receiver, uint256 _value) public;
-}
-
-// interface Development
-contract DevelopmentAcc {
-    function transferTokens(address _receiver, uint256 _value) public;
-}
+import "./BusinessAcc.sol";
+import "./DevelopmentAcc.sol";
 
 contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
 
@@ -95,12 +88,12 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     }
 
     /// @notice Function to mint new tokens every day and divide them between development and business contract
-    function mintTokens() 
+    function mintTokens(uint256 _daysPassed) 
     onlyOwner
     public 
     { 
             uint256 amount = 0;
-            uint256 currentTime = now;
+            uint256 currentTime = now.add(_daysPassed*86400);
             
             if (mintingCounter == 0) {
                 mintingCounter = now;
@@ -108,8 +101,6 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
             }
             
             calculationYearsPassed = (currentTime.sub(inflationStarted)).div(365*24*60*60);  
-
-            // TODO: for testing purpose add another parameter for minting counter to calculate days
 
             require(developmentContract != address(0));
             require(businessContract != address(0));
@@ -122,9 +113,11 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
 
             amount = (totalSupplyForMintingRecorded.mul(inflationRate)).div(10000); // variables are global and is handled in setRecord() 
             require (amount != 0);
-            supplyPerDay = amount.div(365);   
-            mint(owner, supplyPerDay);
-            mintingCounter = mintingCounter.add(86400);     // counter updated to next day; 24 hours = 86400 seconds
+            supplyPerDay = amount.div(365);
+            uint256 mintValue = supplyPerDay.mul(_daysPassed.add(1));   
+            mint(owner, mintValue);
+            // mint(owner, supplyPerDay);
+            mintingCounter = mintingCounter.add((_daysPassed.add(1))*86400);     // counter updated to next day; 24 hours = 86400 seconds
             creditContracts();
     }
 
@@ -304,6 +297,14 @@ contract AegisEconomyCoin is StandardToken, Ownable, MintableToken {
     returns (uint256, uint256, uint256)
     {
             return (inflationYearOneStart, inflationYearTwoStart, inflationYearThreeStart);
+    }
+
+    function getOwner()
+    public
+    view
+    returns (address)
+    {
+            return owner;
     }
 
 }
