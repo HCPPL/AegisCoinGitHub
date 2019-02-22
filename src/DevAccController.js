@@ -9,20 +9,22 @@ router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 
 var W3JSR = DevAccInfo.getWeb3R();
+var contract = DevAccInfo.getContract();
 
 var secretKey = 'superKey';
 
 function verifyMyToken(token) {
 
-    var value = false;
-    console.log(token);
+    var value = true; 
+    // var value = false;
+    // console.log(token);
 
-        // verifies secret and checks exp
-        jwt.verify(token, secretKey, function(err, decoded) {       
-            if (!err) {
-                value = true;
-            }
-        });
+    //     // verifies secret and checks exp
+    //     jwt.verify(token, secretKey, function(err, decoded) {       
+    //         if (!err) {
+    //             value = true;
+    //         }
+    //     });
 
     return value;
 }
@@ -47,7 +49,19 @@ router.post('/addBacklog/:id/:token/:jwtToken', function (req, res) {
             DevAccInfo.Params.ETHER_PKEY, params)
         .then((result,error) =>{
             console.log(result);
-            res.status(200).send(JSON.stringify(result));
+            // Get Contract Event Stream
+            contract.getPastEvents('SuccessfulAdditionOfNewBacklog', {fromBlock: 4970856, toBlock: 'latest'}, (err, events) => {     // TODO: we can also get lastest block and sub 2-3 for fromBlock
+                // console.log("\n EVENTS: ", events) 
+                // console.log("\n EVENTS_LENGTH: ", events.length)
+                console.log("\n ", events[events.length - 1])
+                var eventResult = {"status":1,"functionName":functionName, "eventName":"SuccessfulAdditionOfNewBacklog", "eventResult":events[events.length-1]}
+                res.status(200).send(JSON.stringify(eventResult))
+            // }, (error) => {
+            //     console.log(error);
+            //     retVal = {"error":error};
+            //     res.status(200).send(JSON.stringify(retVal));                
+            })
+            // res.status(200).send(JSON.stringify(result));
         },(error) =>{
             console.log(error);
             retVal = {"error":error};
@@ -60,6 +74,14 @@ router.post('/addBacklog/:id/:token/:jwtToken', function (req, res) {
         });
     }
 });
+
+// DevAccInfo.Params.ADDRESS.myEvent({}, { fromBlock: 0, toBlock: 'latest' }).get((error, eventResult) => {
+//               if (error)
+//                 console.log('Error in myEvent event handler: ' + error);
+//               else
+//                 console.log('myEvent: ' + JSON.stringify(eventResult.args));
+//         });
+
 
 /**
  * Endpoint URL to POST deleteBacklog function
@@ -148,7 +170,13 @@ router.post('/releaseTokensToWinnersForCompleteBacklog/:id/:IWinner/:IIWinner/:I
             DevAccInfo.Params.ETHER_PKEY, params)
         .then((result,error) =>{
             console.log(result);
-            res.status(200).send(JSON.stringify(result));
+                // Get Contract Event Stream
+                contract.getPastEvents('SuccessfulTokensTransferToWinners', {fromBlock: 4970856, toBlock: 'latest'}, (err, events) => {     // TODO: we can also get lastest block and sub 2-3 for fromBlock
+                    console.log("\n ", events[events.length - 1])
+                    var eventResult = {"status":1,"functionName":functionName, "eventName":"SuccessfulTokensTransferToWinners", "eventResult":events[events.length-1]}
+                    res.status(200).send(JSON.stringify(eventResult))
+                })
+            // res.status(200).send(JSON.stringify(result));
         },(error) =>{
             console.log(error);
             retVal = {"error":error};
@@ -165,6 +193,7 @@ router.post('/releaseTokensToWinnersForCompleteBacklog/:id/:IWinner/:IIWinner/:I
 /**
  * Endpoint URL to POST releaseTokensForVoters function
  * @author GagandeepHashCode
+ * @dev    The array of voter addresses should be passed as a string of addresses separated by comma
  * @param  {number} id      Backlog Id to be added
  * @param  {string} voters  Set array of voters
  * @return transaction hash as JSON response
@@ -184,7 +213,13 @@ router.post('/releaseTokensForVoters/:id/:voters/:jwtToken', function (req, res)
             DevAccInfo.Params.ETHER_PKEY, params)
         .then((result,error) =>{
             console.log(result);
-            res.status(200).send(JSON.stringify(result));
+            // Get Contract Event Stream
+                contract.getPastEvents('SuccessfulTokensTransferToVoters', {fromBlock: 4970856, toBlock: 'latest'}, (err, events) => {     // TODO: we can also get lastest block and sub 2-3 for fromBlock
+                    console.log("\n ", events[events.length - 1])
+                    var eventResult = {"status":1,"functionName":functionName, "eventName":"SuccessfulTokensTransferToVoters", "eventResult":events[events.length-1]}
+                    res.status(200).send(JSON.stringify(eventResult))
+                })
+            // res.status(200).send(JSON.stringify(result));
         },(error) =>{
             console.log(error);
             retVal = {"error":error};

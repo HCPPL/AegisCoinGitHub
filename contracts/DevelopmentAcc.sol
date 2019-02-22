@@ -47,8 +47,9 @@ contract DevelopmentAcc is Ownable {
   	event SuccessfulAdditionOfNewBacklog(uint256 _backlogId, uint256 _tokens);
   	event SuccessfulUpdateOfBacklog(uint256 _backlogId, uint256 _tokens);
   	event SuccessfulDeletionOfBacklog(uint256 _backlogId);
-  	event SuccessfulTokensTransferToWinners(uint256 _backlogId);
-  	event SuccessfulTokensTransferToVoters(uint256 _backlogId);
+  	event SuccessfulTokensTransferToWinners(uint256 _backlogId, uint256 _firstWinnerTokens, uint256 _secondWinnerTokens, uint256 _thirdWinnerTokens);
+  	// event SuccessfulTokensTransferToWinners(uint256 _backlogId);
+  	event SuccessfulTokensTransferToVoters(uint256 _backlogId, uint256 _tokensPerVoter);
 
 	
 	/// @author Gagandeep_HashCode
@@ -223,8 +224,9 @@ contract DevelopmentAcc is Ownable {
 			aegisCoin.transfer(_secondWinner, tokensForSecondWinner);
 			aegisCoin.transfer(_thirdWinner, tokensForThirdWinner);
 			// update reserved tokens
-            totalTokensReserved = totalTokensReserved.sub(tokensForFirstWinner.add(tokensForSecondWinner.add(tokensForThirdWinner)));
-            emit SuccessfulTokensTransferToWinners(_backlogId); 
+			totalTokensReserved = totalTokensReserved.sub(tokensForFirstWinner.add(tokensForSecondWinner.add(tokensForThirdWinner)));
+			emit SuccessfulTokensTransferToWinners(_backlogId, tokensForFirstWinner, tokensForSecondWinner, tokensForThirdWinner); 
+			// emit SuccessfulTokensTransferToWinners(_backlogId); 
 	} 
 
 
@@ -232,7 +234,7 @@ contract DevelopmentAcc is Ownable {
 	/// @dev As backlog-Id is mapped with tokensPerVoter. We need not to recalculate or pass it from php. This will be handled withing the smart contract
 	/// @param _backlogId Backlog-Id 
 	/// @param _voters Array of voter addresses
-	function releaseTokensForVoters(uint256 _backlogId, address[] _voters)  
+	function releaseTokensForVoters(uint256 _backlogId, address[] memory _voters)  
 	ifBacklogExisted(_backlogId)
 	public
 	{
@@ -254,7 +256,7 @@ contract DevelopmentAcc is Ownable {
 			if (backlogId2backlogDetails[_backlogId].totalVotersPaid == backlogId2backlogDetails[_backlogId].totalVoters) {
 					backlogId2backlogDetails[_backlogId].statusValue = 5;
 			}
-			emit SuccessfulTokensTransferToVoters(_backlogId); 
+			emit SuccessfulTokensTransferToVoters(_backlogId, tokens); 
 	}
 
 
@@ -412,7 +414,7 @@ contract DevelopmentAcc is Ownable {
 	function getBacklogIDs()
 	view
 	public
-	returns(uint256[])
+	returns(uint256[] memory)
 	{
 			return backlogIds;	
 	}

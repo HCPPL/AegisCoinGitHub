@@ -14,15 +14,16 @@ var secretKey = 'superKey';
 
 function verifyMyToken(token) {
 
-    var value = false;
-    // console.log(token);
+    var value = true;
+    // var value = false;
+    // // console.log(token);
 
-        // verifies secret and checks exp
-        jwt.verify(token,secretKey, function(err, decoded) {       
-            if (!err) {
-                value = true;
-            }
-        });
+    //     // verifies secret and checks exp
+    //     jwt.verify(token,secretKey, function(err, decoded) {       
+    //         if (!err) {
+    //             value = true;
+    //         }
+    //     });
 
     return value;
 }
